@@ -138,6 +138,46 @@ h1 {
   line-height: 1.6;
 }
 
+.footer p + p {
+  margin-top: 10px;
+}
+
+a {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.legal-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 28px 56px;
+}
+
+.legal-nav {
+  margin-bottom: 48px;
+}
+
+.legal-content h1 {
+  margin-bottom: 24px;
+}
+
+.legal-content section {
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+}
+
+.legal-content h2 {
+  margin: 0 0 10px;
+  font-size: 1.12rem;
+}
+
+.legal-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
