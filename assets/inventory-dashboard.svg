@@ -1,0 +1,24 @@
+<svg width="520" height="360" viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inventory dashboard illustration">
+  <rect width="520" height="360" rx="8" fill="#F2EDE3"/>
+  <rect x="48" y="44" width="424" height="272" rx="8" fill="#FFFFFF" stroke="#D7DFD8" stroke-width="2"/>
+  <rect x="48" y="44" width="424" height="58" rx="8" fill="#1F6F57"/>
+  <rect x="48" y="88" width="424" height="14" fill="#1F6F57"/>
+  <circle cx="84" cy="73" r="13" fill="#F6C863"/>
+  <rect x="112" y="64" width="172" height="18" rx="9" fill="#EAF4EF"/>
+  <rect x="374" y="63" width="62" height="20" rx="10" fill="#E15B3F"/>
+  <rect x="76" y="132" width="116" height="72" rx="8" fill="#FFF7E8" stroke="#E8D8B4" stroke-width="2"/>
+  <rect x="214" y="132" width="116" height="72" rx="8" fill="#EAF4EF" stroke="#CBE0D5" stroke-width="2"/>
+  <rect x="352" y="132" width="72" height="72" rx="8" fill="#EDF4FA" stroke="#C8D8E8" stroke-width="2"/>
+  <rect x="92" y="150" width="64" height="9" rx="4.5" fill="#D8A12D"/>
+  <rect x="92" y="170" width="84" height="10" rx="5" fill="#7A837D"/>
+  <rect x="230" y="150" width="54" height="9" rx="4.5" fill="#1F6F57"/>
+  <rect x="230" y="170" width="78" height="10" rx="5" fill="#7A837D"/>
+  <rect x="370" y="150" width="38" height="9" rx="4.5" fill="#386FA4"/>
+  <rect x="370" y="170" width="32" height="10" rx="5" fill="#7A837D"/>
+  <rect x="76" y="232" width="348" height="14" rx="7" fill="#DDE7E1"/>
+  <rect x="76" y="258" width="292" height="14" rx="7" fill="#E8DED0"/>
+  <rect x="76" y="284" width="242" height="14" rx="7" fill="#DDE7E1"/>
+  <path d="M427 224L448 245L412 281L391 260L427 224Z" fill="#E15B3F"/>
+  <path d="M448 245L460 257L424 293L412 281L448 245Z" fill="#D8A12D"/>
+  <path d="M386 265L412 281L397 291L386 265Z" fill="#17211C"/>
+</svg>
