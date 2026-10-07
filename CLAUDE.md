@@ -35,6 +35,18 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 - Keep files small and well named (guideline: under ~400 lines); split when a file grows past that and the task allows it.
 - When a message includes "Likely relevant files", check those first before searching.
 
+## Core coding rules
+- Correct first: handle normal, empty, invalid, error and slow cases; never break existing behaviour.
+- Readable: clear names, small single-purpose functions, follow the project's existing style; comments say why, not what.
+- Simple: build only what is needed now; reuse instead of copy-paste, but no premature abstractions; platform built-ins before new libraries.
+- Secure (OWASP): validate all external input; parameterised queries only; escape user content in pages; check permissions on every request for the specific object; no secrets in code.
+- Errors: catch specific errors, show users a helpful message, log the details; never swallow errors silently.
+- Tested: test behaviour, not internals; fast, independent tests; every bug fix gets a test that would have caught it.
+- User-facing: accessible (labels, alt, keyboard, contrast), fast (optimised images, no blocking scripts), works on mobile.
+- Clean: no dead code, debug prints or commented-out blocks; one formatter and linter per project; pinned dependencies with committed lockfiles.
+- Small, focused commits with clear messages; one change at a time so problems are easy to find and undo.
+- Keep README (run/test/deploy), CHANGELOG and CLAUDE.md conventions current when behaviour changes.
+
 ## Plan, research, prove
 - Anything bigger than a one-line fix starts with the `plan` skill: plan in `.claude/plans/current.md`, researched against (in order) the request, this project and `## Preferences`, saved notes in `.claude/research/`, official docs for the installed versions, then the standards in `.claude/standards/`.
 - Every plan item gets ticked only with proof (`- proof: test name / file:line / check result`); the Stop hook blocks finishing until it is.
