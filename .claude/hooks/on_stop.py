@@ -7,7 +7,7 @@ In order, once per session each:
   3. label repeated CLAUDE_SKILL_AFTER times with no skill -> create the skill
 Trivial turns (fewer than 3 tool calls in the session) are never blocked.
 """
-import csv, json, os, subprocess
+import csv, json, os, re, subprocess
 from _kit import (setting, safe_run, log_event, ROOT, HOOKS, PY, read_input, state_dir, session_path, load, save,
                   emit, slug, project_name, today)
 
@@ -187,6 +187,47 @@ def broken_links(flags):
     return "Broken links or redirect loops after your changes. Fix them before finishing:\n" + "\n".join(problems[:30])
 
 
+def missing_migration(flags):
+    """Schema changed but no migration was added: ask for one."""
+    if flags.get("migration"):
+        return None
+    from stack import database
+    db = database(ROOT)
+    if not db or not db["schema"]:
+        return None
+    files = [f.replace(os.sep, "/") for f in changed_files(("",))]
+    mig = re.compile(db["migrations"])
+    schema = [f for f in files if any(re.search(rx, f) for rx in db["schema"]) and not mig.search(f)]
+    if not schema or any(mig.search(f) for f in files):
+        return None
+    flags["migration"] = True
+    return (f"You changed the database schema ({', '.join(schema[:5])}) but added no migration. Existing "
+            f"databases won't get the change. Create one with `{db['new']}`, review it for data loss, "
+            "and test it on a copy/dev database before finishing.")
+
+
+def visual_changes(flags):
+    """After UI changes, screenshot pages before/after and ask Claude to confirm the changes are intended."""
+    if not setting("CLAUDE_VISUAL_CHECK", 1):
+        return None
+    ui = changed_files((".css", ".scss", ".sass", ".less", ".html", ".htm", ".jsx", ".tsx", ".vue", ".svelte"))
+    stamp = str([(f, os.path.getmtime(os.path.join(ROOT, f))) for f in ui if os.path.exists(os.path.join(ROOT, f))])
+    if not ui or flags.get("visual") == stamp:
+        return None
+    import visual
+    if not visual.chrome():
+        return None
+    cfg = visual.server_config()
+    results = visual.check_server(cfg) if cfg else visual.check_static()
+    flags["visual"] = stamp
+    log_event("visual", "changed" if results else "same")
+    if not results:
+        return None
+    return ("Your changes altered how these pages look:\n" + visual.report(results) + "\nOpen the diff images "
+            "(changes in red). If every change is what the user asked for, finish normally. If other pages or "
+            "areas changed by accident, fix that first.")
+
+
 def boot_check(flags):
     """After code changes, start the app briefly and make sure it still boots."""
     if not setting("CLAUDE_SMOKE_TEST", 1):
@@ -233,7 +274,8 @@ def main():
         save(flags_file, flags)
         emit({"decision": "block", "reason": reason})
 
-    failing = related_tests(flags) or broken_links(flags) or boot_check(flags)
+    failing = (missing_migration(flags) or related_tests(flags) or broken_links(flags)
+               or boot_check(flags) or visual_changes(flags))
     save(flags_file, flags)
     if failing:
         return block("tests", failing)

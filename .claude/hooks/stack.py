@@ -122,6 +122,9 @@ LABELS = [("dev", "Run"), ("test", "Test"), ("test_related", "Test changed files
 
 def commands_block(root):
     name, cmds = detect(root)
+    db = database(root)
+    if db:
+        cmds = {**cmds, "migrate_new": db["new"], **({"migrate_check": db["check"]} if db["check"] else {})}
     if not cmds:
         return None
     lines = [START, f"## Commands (auto-detected: {name}; refreshed each session)"]
@@ -172,3 +175,28 @@ def tests_for(root, rel):
         dirs[:] = [d for d in dirs if d not in SKIP_WALK and not d.startswith(".")]
         found += [os.path.relpath(os.path.join(dp, f), root) for f in fs if f in names]
     return found
+
+
+def database(root):
+    """Detect the migration tool. Returns dict(tool, schema=[path regexes], migrations=dir regex, new, check) or None."""
+    ex = lambda *p: os.path.exists(os.path.join(root, *p))
+    if ex("prisma", "schema.prisma"):
+        return {"tool": "prisma", "schema": [r"(^|/)schema\.prisma$"], "migrations": r"prisma/migrations/",
+                "new": "npx prisma migrate dev --create-only --name <change>", "check": "npx prisma validate"}
+    if ex("manage.py"):
+        return {"tool": "django", "schema": [r"(^|/)models(\.py|/[^/]+\.py)$"], "migrations": r"(^|/)migrations/",
+                "new": "python manage.py makemigrations",
+                "check": "python manage.py makemigrations --check --dry-run"}
+    if ex("alembic.ini"):
+        return {"tool": "alembic", "schema": [r"(^|/)models?(\.py|/[^/]+\.py)$"], "migrations": r"alembic/versions/",
+                "new": "alembic revision --autogenerate -m '<change>'", "check": "alembic check"}
+    if ex("db", "schema.rb") or ex("db", "migrate"):
+        return {"tool": "rails", "schema": [r"^app/models/"], "migrations": r"^db/migrate/",
+                "new": "bin/rails generate migration <Change>", "check": None}
+    if any(ex(f"drizzle.config.{e}") for e in ("ts", "js", "mjs")):
+        return {"tool": "drizzle", "schema": [r"(^|/)schema(\.ts|\.js|/)"], "migrations": r"(^|/)drizzle/",
+                "new": "npx drizzle-kit generate", "check": "npx drizzle-kit check"}
+    if ex("supabase", "migrations"):
+        return {"tool": "supabase", "schema": [], "migrations": r"^supabase/migrations/",
+                "new": "supabase migration new <change>", "check": None}
+    return None

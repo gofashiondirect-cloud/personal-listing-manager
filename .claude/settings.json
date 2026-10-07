@@ -57,6 +57,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/db_guard.py\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard_bash.py\"",
             "timeout": 10
           },
@@ -68,8 +73,13 @@
         ]
       },
       {
-        "matcher": "Edit|MultiEdit",
+        "matcher": "Edit|MultiEdit|Write",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/db_guard.py\"",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard_edit.py\"",

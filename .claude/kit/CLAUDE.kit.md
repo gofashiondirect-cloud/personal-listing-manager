@@ -29,6 +29,8 @@
 - When you rename a function or change its parameters, update every caller the hook lists.
 - `git commit` runs the full test suite (and link check); a failing commit means something else depends on your change.
 - After code changes the app is started briefly; after HTML changes, links, anchors and redirects are checked.
+- After UI changes, pages are screenshotted before/after; look at the red diff images and fix any change the user didn't ask for. For apps with a dev server, list pages in `.claude/visual/pages.json` and run `visual.py accept` after intended redesigns.
+- Database: every schema change gets a new migration (see `## Commands`); never edit a committed migration; destructive DB commands need the user's OK, and migrations are tried on a dev/copy database first.
 - CI (`.github/workflows/`) runs the same checks on every push; keep it green.
 
 ## Self-improvement (hooks enforce the first three)

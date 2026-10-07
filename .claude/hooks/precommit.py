@@ -21,7 +21,9 @@ def main():
         return
     from stack import detect
     cmds = detect(ROOT)[1]
-    steps = [c for c in (cmds.get("typecheck"), cmds.get("test")) if c]
+    from stack import database
+    db = database(ROOT) or {}
+    steps = [c for c in (db.get("check"), cmds.get("typecheck"), cmds.get("test")) if c]
     if os.path.exists(os.path.join(ROOT, ".claude", "hooks", "linkcheck.py")):
         from linkcheck import check
         broken = check(ROOT)
