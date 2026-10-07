@@ -68,8 +68,28 @@ def html_pages(root):
                 yield os.path.relpath(os.path.join(dp, f), root)
 
 
-def check_static(changed_only=None):
-    """Compare HEAD vs working tree for each HTML page. Returns list of (page, pct, diff_png)."""
+def affected_pages(changed):
+    """HTML pages that are themselves changed or load a changed file. None = can't tell, check all."""
+    if not changed:
+        return None
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from linkcheck import parse, resolve
+    changed = {os.path.normpath(os.path.join(ROOT, c)) for c in changed}
+    pages, used = set(), set()
+    for page in html_pages(ROOT):
+        full = os.path.join(ROOT, page)
+        deps = {full} | {resolve(ROOT, full, link)[0] for link in parse(full).resources} - {None}
+        used |= deps
+        if deps & changed:
+            pages.add(page)
+    if changed - used:  # a changed UI file no page links directly (e.g. a JS component): check all
+        return None
+    return pages
+
+
+def check_static(changed=None):
+    """Compare HEAD vs working tree for affected HTML pages. Returns list of result tuples."""
+    only = affected_pages(changed)
     head = tempfile.mkdtemp(prefix="claude-visual-head-")
     try:
         archive = subprocess.run(["git", "archive", "HEAD"], cwd=ROOT, capture_output=True, timeout=60)
@@ -78,7 +98,7 @@ def check_static(changed_only=None):
         subprocess.run(["tar", "-x", "-C", head], input=archive.stdout, timeout=60)
         results = []
         for page in html_pages(ROOT):
-            if changed_only is not None and page not in changed_only and not changed_only & {"*"}:
+            if only is not None and page not in only:
                 continue
             if not os.path.exists(os.path.join(head, page)):
                 continue  # new page: nothing to compare against

@@ -29,11 +29,23 @@ def main():
         broken = check(ROOT)
         if broken:
             return deny("Broken links/loops found:\n" + "\n".join(broken[:30]))
-    if not steps:
-        return
     stamp_file = os.path.join(state_dir(), "precommit.json")
     stamp = tree_stamp()
-    if load(stamp_file, {}).get("passed") == stamp:
+    state = load(stamp_file, {})
+    if state.get("passed") == stamp:
+        return
+    from checks import HEAVY, deferred, fast_mode, run
+    late = set(HEAVY) if fast_mode(data.get("session_id")) else deferred()
+    extra = {}
+    if "boot" in late:
+        extra["boot"] = boot
+    if "visual" in late and state.get("visual_seen") != stamp:
+        extra["visual"] = visual
+    failing = run(extra, stamp_file, stamp)
+    if failing:
+        return deny(failing)
+    if not steps:
+        save(stamp_file, {**load(stamp_file, {}), "passed": stamp})
         return
     for step in steps:
         try:
@@ -46,8 +58,32 @@ def main():
             tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-40:])
             return deny(f"Full check `{step}` fails, so the commit was stopped. Something else depends on "
                         f"what you changed. Fix it (or /undo), then commit again:\n{tail}")
-    save(stamp_file, {"passed": stamp})
+    save(stamp_file, {**load(stamp_file, {}), "passed": stamp})
     log_event("precommit", "pass")
+
+
+def boot(stamp_file, stamp):
+    from stack import detect
+    cmd = detect(ROOT)[1].get("dev")
+    if not cmd or cmd.startswith("open "):
+        return None
+    from smoke import smoke
+    ok, tail = smoke(cmd, setting("CLAUDE_SMOKE_SECONDS", 25))
+    return None if ok else f"The app no longer starts (`{cmd}`), so the commit was stopped:\n{tail}"
+
+
+def visual(stamp_file, stamp):
+    """Show visual changes once per change set; committing again after review is allowed."""
+    import visual as vis
+    if not vis.chrome():
+        return None
+    cfg = vis.server_config()
+    results = vis.check_server(cfg) if cfg else vis.check_static()
+    save(stamp_file, {**load(stamp_file, {}), "visual_seen": stamp})
+    if not results:
+        return None
+    return ("Before committing, review how these pages changed:\n" + vis.report(results) +
+            "\nIf all changes are intended, run the same commit again; otherwise fix them first.")
 
 
 def deny(reason):

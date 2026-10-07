@@ -32,6 +32,7 @@
 - After UI changes, pages are screenshotted before/after; look at the red diff images and fix any change the user didn't ask for. For apps with a dev server, list pages in `.claude/visual/pages.json` and run `visual.py accept` after intended redesigns.
 - Database: every schema change gets a new migration (see `## Commands`); never edit a committed migration; destructive DB commands need the user's OK, and migrations are tried on a dev/copy database first.
 - CI (`.github/workflows/`) runs the same checks on every push; keep it green.
+- Speed: end-of-turn checks run in parallel and only on what changed; checks that are slow for this project move to commit time automatically. When the user says "fast mode on", heavy checks wait until `git commit`; "fast mode off" restores them.
 
 ## Self-improvement (hooks enforce the first three)
 - Keep the `## Project map` in CLAUDE.md current when adding top-level files or folders.

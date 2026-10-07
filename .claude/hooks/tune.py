@@ -2,6 +2,8 @@
 """Auto-tune hook limits from the event log (run at most once a day by session_summary.py).
 
 - A guard rule Claude overrides more than half the time (5+ blocks in 30 days) is switched off.
+- Speed: an end-of-turn check whose typical run exceeds CLAUDE_CHECK_BUDGET_MS (15s) moves to
+  commit time; it moves back once it runs in under half the budget.
 - Trimming: if Claude often opens the saved full output, limits go up 25%;
   if it never does across 20+ trims, they go down 15%.
 Changes are written to tuning.json and explained in tuning-history.log.
@@ -62,6 +64,22 @@ def tune(force=False):
             if new != old:
                 t[name] = new
                 changes.append(f"{name} {old} -> {new} (full output used {used}/{trims} trims)")
+
+    budget = int(os.environ.get("CLAUDE_CHECK_BUDGET_MS", t.get("CLAUDE_CHECK_BUDGET_MS", 15000)))
+    times = {}
+    for e in ev:
+        if e["hook"] == "timing" and e.get("ms"):
+            times.setdefault(e["key"], []).append(e["ms"])
+    deferred = t.setdefault("deferred_checks", [])
+    for name, ms in times.items():
+        recent = sorted(ms[-20:])
+        median = recent[len(recent) // 2]
+        if len(recent) >= 3 and median > budget and name not in deferred:
+            deferred.append(name)
+            changes.append(f"'{name}' check takes ~{median // 1000}s per turn: now runs at commit instead")
+        elif name in deferred and len(recent) >= 3 and median < budget // 2:
+            deferred.remove(name)
+            changes.append(f"'{name}' check is fast again (~{median // 1000}s): back to every turn")
 
     save(path, t)
     if changes:

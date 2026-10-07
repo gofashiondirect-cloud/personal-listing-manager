@@ -64,8 +64,17 @@ def paste_focus(prompt):
 
 
 def main():
-    prompt = read_input().get("prompt") or ""
+    data = read_input()
+    prompt = data.get("prompt") or ""
     notes = []
+    m = re.search(r"\bfast\s*mode\s*(on|off)?\b", prompt, re.I)
+    if m:
+        from checks import set_fast_mode
+        on = (m.group(1) or "on").lower() == "on"
+        set_fast_mode(data.get("session_id"), on)
+        notes.append("Fast mode ON: tests, startup, link and visual checks now run only at `git commit`; "
+                     "per-edit checks still run. Say 'fast mode off' to restore." if on else
+                     "Fast mode OFF: all checks run at the end of each turn again.")
     hints = file_hints(prompt)
     if hints:
         notes.append("Likely relevant files (from names; verify before relying on them): " + ", ".join(hints))

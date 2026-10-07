@@ -71,12 +71,12 @@ def setting(name, default):
     return type(default)(tuning().get(name, default))
 
 
-def log_event(hook, kind, key=""):
+def log_event(hook, kind, key="", **extra):
     """Append one guard/trim event; tune.py reads these to adjust limits."""
     try:
         path = os.path.join(state_dir(), "events.jsonl")
         with open(path, "a", encoding="utf-8") as f:
-            f.write(json.dumps({"date": today(), "hook": hook, "kind": kind, "key": key}) + "\n")
+            f.write(json.dumps({"date": today(), "hook": hook, "kind": kind, "key": key, **extra}) + "\n")
         if os.path.getsize(path) > 400_000:  # keep the newest ~2000 events
             lines = open(path, encoding="utf-8").readlines()[-2000:]
             with open(path, "w", encoding="utf-8") as f:

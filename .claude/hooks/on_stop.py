@@ -218,7 +218,7 @@ def visual_changes(flags):
     if not visual.chrome():
         return None
     cfg = visual.server_config()
-    results = visual.check_server(cfg) if cfg else visual.check_static()
+    results = visual.check_server(cfg) if cfg else visual.check_static(ui)
     flags["visual"] = stamp
     log_event("visual", "changed" if results else "same")
     if not results:
@@ -274,8 +274,10 @@ def main():
         save(flags_file, flags)
         emit({"decision": "block", "reason": reason})
 
-    failing = (missing_migration(flags) or related_tests(flags) or broken_links(flags)
-               or boot_check(flags) or visual_changes(flags))
+    from checks import run, stop_checks
+    active = stop_checks(sid)
+    heavy = {"tests": related_tests, "links": broken_links, "boot": boot_check, "visual": visual_changes}
+    failing = missing_migration(flags) or run({n: f for n, f in heavy.items() if n in active}, flags)
     save(flags_file, flags)
     if failing:
         return block("tests", failing)

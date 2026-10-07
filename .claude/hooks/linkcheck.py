@@ -14,7 +14,7 @@ SKIP = {"node_modules", ".git", "dist", "build", ".venv", "venv", "coverage", ".
 class Page(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links, self.ids, self.refresh = [], set(), None
+        self.links, self.ids, self.refresh, self.resources = [], set(), None, []
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -25,6 +25,8 @@ class Page(HTMLParser):
         for attr in ("href", "src"):
             if a.get(attr) and tag in ("a", "link", "script", "img", "source", "iframe", "video", "audio"):
                 self.links.append((self.getpos()[0], a[attr]))
+                if tag != "a":
+                    self.resources.append(a[attr])  # things that change how this page looks
         if tag == "meta" and (a.get("http-equiv") or "").lower() == "refresh":
             m = re.search(r"url\s*=\s*['\"]?([^'\";]+)", a.get("content") or "", re.I)
             if m:
