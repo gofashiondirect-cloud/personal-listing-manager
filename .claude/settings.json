@@ -2,7 +2,8 @@
   "model": "opusplan",
   "env": {
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60",
+    "CLAUDE_KIT_STATE_DIR": ".claude/state"
   },
   "permissions": {
     "deny": [
@@ -46,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard_large_read.py\"",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard_read.py\"",
             "timeout": 10
           }
         ]
@@ -62,6 +63,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/check_edit.py\"",
+            "timeout": 90
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -70,6 +81,17 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/long_session_nudge.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/on_stop.py\"",
             "timeout": 10
           }
         ]

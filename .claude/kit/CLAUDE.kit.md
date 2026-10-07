@@ -1,17 +1,3 @@
-# Project rules for Claude
-
-## Project map
-Static marketing site for Personal Listing Manager. No build step, no JavaScript, no tests.
-- `index.html`: landing page
-- `privacy-terms.html`: privacy policy and terms
-- `styles.css`: all styling, shared by both pages
-- `assets/`: images (SVG)
-Preview by opening `index.html` in a browser. Keep this map updated when files are added.
-
-## Kit state
-`.claude/state/` holds the task log and usage log; commit it with your work so later sessions and the weekly review can use it.
-
-<!-- claude-kit:start -->
 ## Token discipline
 - Read only what you need: grep, or Read with offset/limit, instead of whole files.
 - Pipe long command output through `head`, `tail` or `grep`.
@@ -36,4 +22,3 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 - Use the Message Batches API for non-urgent bulk jobs.
 - Don't resend whole histories or large documents every call: trim, summarise, or retrieve only relevant chunks.
 - Log token usage per request so costs are visible.
-<!-- claude-kit:end -->
