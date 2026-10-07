@@ -101,6 +101,69 @@ def long_skills():
     return found
 
 
+CODE_EXT = (".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".go", ".rs")
+
+
+def changed_code_files():
+    try:
+        out = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=ROOT,
+                             capture_output=True, text=True, timeout=5).stdout
+    except Exception:
+        return []
+    files = [l[3:].strip().strip('"').split(" -> ")[-1] for l in out.splitlines() if l[:2].strip() != "D"]
+    return sorted(f for f in files if f.endswith(CODE_EXT) and not f.startswith(".claude/")
+                  and os.path.isfile(os.path.join(ROOT, f)))
+
+
+def python_tests_for(files):
+    """Changed test files, plus tests named after changed modules (test_x.py / x_test.py)."""
+    tests = {f for f in files if os.path.basename(f).startswith("test_") or f.endswith("_test.py")}
+    stems = {os.path.splitext(os.path.basename(f))[0] for f in files if f.endswith(".py")}
+    for dp, dirs, fs in os.walk(ROOT):
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules", ".venv", "venv")]
+        for f in fs:
+            if f in {f"test_{s}.py" for s in stems} | {f"{s}_test.py" for s in stems}:
+                tests.add(os.path.relpath(os.path.join(dp, f), ROOT))
+    return sorted(tests)
+
+
+def related_tests(flags):
+    """Run tests related to the changed files once per change set. Returns a block reason on failure."""
+    files = changed_code_files()
+    if not files:
+        return None
+    stamp = str([(f, os.path.getmtime(os.path.join(ROOT, f))) for f in files])
+    if flags.get("tested") == stamp:
+        return None
+    from stack import detect
+    cmd = detect(ROOT)[1].get("test_related")
+    if not cmd:
+        return None
+    if "{pkgs}" in cmd:
+        targets = sorted({"./" + (os.path.dirname(f) or ".") for f in files if f.endswith(".go")})
+        cmd = cmd.replace("{pkgs}", " ".join(targets))
+    elif cmd.startswith("pytest"):
+        targets = python_tests_for(files)
+        cmd = cmd.replace("{files}", " ".join(f'"{t}"' for t in targets))
+    else:
+        targets = [f for f in files if not f.endswith((".py", ".go", ".rs"))]
+        cmd = cmd.replace("{files}", " ".join(f'"{t}"' for t in targets))
+    if not targets:
+        return None
+    try:
+        r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True,
+                           timeout=setting("CLAUDE_TEST_TIMEOUT", 300))
+    except subprocess.TimeoutExpired:
+        return None
+    if r.returncode in (0, 5):  # 5 = pytest found no tests
+        flags["tested"] = stamp
+        log_event("tests", "pass")
+        return None
+    log_event("tests", "fail")
+    tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-40:])
+    return f"Tests related to your changes fail (`{cmd}`). Fix them before finishing:\n{tail}"
+
+
 def main():
     data = read_input()
     sid = data.get("session_id") or "unknown"
@@ -108,6 +171,11 @@ def main():
     try:
         log_usage(sid, totals, model)
     except OSError:
+        pass
+    try:
+        from checkpoint import create
+        create(f"end of turn ({sid[:8]})")
+    except Exception:
         pass
 
     flags_file = session_path(sid, "stop.json")
@@ -120,6 +188,11 @@ def main():
         flags["blocks"] += 1
         save(flags_file, flags)
         emit({"decision": "block", "reason": reason})
+
+    failing = related_tests(flags)
+    save(flags_file, flags)
+    if failing:
+        return block("tests", failing)
 
     if not flags.get("map"):
         missing = unmapped_paths()

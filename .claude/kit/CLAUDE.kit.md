@@ -16,6 +16,14 @@
 - Keep files small and well named (guideline: under ~400 lines); split when a file grows past that and the task allows it.
 - When a message includes "Likely relevant files", check those first before searching.
 
+## Shipping features fast
+- Use the `feature` skill for any add/change-a-feature request, and the `undo` skill to roll back.
+- Before writing something new, find the closest existing example in the project and follow its structure, naming and style.
+- Work on a `feature/<slug>` branch unless the session already names a branch; keep the main branch working.
+- Use the commands in `## Commands` (auto-detected) instead of guessing how to run, test or build.
+- Record each finished feature as one user-facing line at the top of `CHANGELOG.md`.
+- Repeated kinds of feature (new page, endpoint, component) become scaffold skills via the skill rule below.
+
 ## Self-improvement (hooks enforce the first three)
 - Keep the `## Project map` in CLAUDE.md current when adding top-level files or folders.
 - When asked by the Stop hook, record a task label; reuse an existing label for the same kind of task.

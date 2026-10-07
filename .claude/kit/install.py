@@ -25,8 +25,11 @@ def load(path, default):
 def merge_settings(dest, src, kit_files):
     for k, v in src.items():
         if k == "permissions":
-            deny = dest.setdefault("permissions", {}).setdefault("deny", [])
-            deny += [d for d in v.get("deny", []) if d not in deny]
+            for kind in ("allow", "deny"):
+                if not v.get(kind):
+                    continue
+                cur = dest.setdefault("permissions", {}).setdefault(kind, [])
+                cur += [d for d in v.get(kind, []) if d not in cur]
         elif k == "env":
             for ek, ev in v.items():
                 dest.setdefault("env", {}).setdefault(ek, ev)
@@ -91,6 +94,18 @@ def main():
     with open(settings_path, "w", encoding="utf-8") as f:
         json.dump(merged, f, indent=2)
         f.write("\n")
+
+    skills_src = os.path.join(KIT, "skills")
+    if os.path.isdir(skills_src):
+        shutil.copytree(skills_src, os.path.join(dest_claude, "skills"), dirs_exist_ok=True)
+        if a.glob:  # skills must call the global hooks, not a project path
+            for name in os.listdir(skills_src):
+                md = os.path.join(dest_claude, "skills", name, "SKILL.md")
+                if os.path.exists(md):
+                    text = open(md, encoding="utf-8").read().replace(
+                        "python3 .claude/hooks/", f'"{sys.executable}" "{hooks_dir}/'.replace("\\", "/"))
+                    text = text.replace('checkpoint.py ', 'checkpoint.py" ').replace('checkpoint.py`', 'checkpoint.py"`')
+                    open(md, "w", encoding="utf-8").write(text)
 
     write_rules(rules_path, open(os.path.join(KIT, "CLAUDE.kit.md"), encoding="utf-8").read())
     if not a.glob:

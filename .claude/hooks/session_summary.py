@@ -67,6 +67,13 @@ if branch:
     status = git("status", "--short")
     lines.append("Uncommitted changes:\n" + status if status else "Working tree clean.")
 lines += [f"Files (depth {MAX_DEPTH}, max {MAX_ENTRIES}):", *tree()]
+try:
+    from stack import sync_claude_md
+    block = sync_claude_md(ROOT)
+    if block:
+        lines += [l for l in block.splitlines() if not l.startswith("<!--")]
+except Exception:
+    pass
 if data.get("source") == "compact":
     label = load(session_path(data.get("session_id"), "label.json"), {}).get("label")
     lines.insert(1, "Context was just compacted. Continue from the summary; re-read only the files "

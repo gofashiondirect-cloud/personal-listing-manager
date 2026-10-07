@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """PostToolUse(Edit|Write|MultiEdit): run a fast check on the changed file; report failures to Claude.
 
-Per-project overrides in .claude/checks.json, e.g. {".ts": "npx --no-install tsc --noEmit", ".py": "ruff check {file}"}.
-An empty string disables checks for that extension.
+First runs the project's own formatter (auto-detected; only if the project has one configured).
+Per-project overrides in .claude/checks.json, e.g. {".ts": "npx --no-install tsc --noEmit",
+".py": "ruff check {file}", "format": {".py": "black -q {file}"}}. An empty string disables one.
 """
 import os, shutil, subprocess
 from _kit import setting, safe_run, log_event, ROOT, PY, read_input, load, save, session_path, emit
@@ -46,14 +47,43 @@ def default_cmd(ext):
     return None
 
 
+FORMAT_EXT = {
+    "prettier": {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".css", ".scss", ".html", ".json", ".md", ".yaml", ".yml", ".vue"},
+    "ruff": {".py"}, "black": {".py"}, "gofmt": {".go"}, "rustfmt": {".rs"},
+}
+
+
+def auto_format(path, ext, custom):
+    """Run the project's own formatter on the edited file. Returns a note if the file changed."""
+    if "format" in custom:
+        cmd = custom["format"].get(ext)
+    else:
+        from stack import detect
+        cmd = detect(ROOT)[1].get("formatter")
+        if cmd and not any(tool in cmd and ext in exts for tool, exts in FORMAT_EXT.items()):
+            cmd = None
+    if not cmd:
+        return None
+    before = os.path.getmtime(path), os.path.getsize(path)
+    try:
+        subprocess.run(cmd.replace("{file}", f'"{path}"'), shell=True, cwd=ROOT,
+                       capture_output=True, timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None
+    if (os.path.getmtime(path), os.path.getsize(path)) != before:
+        return f"{os.path.basename(path)} was auto-formatted by the project's formatter."
+    return None
+
+
 def main():
     data = read_input()
     path = (data.get("tool_input") or {}).get("file_path")
     if not path or not os.path.isfile(path):
         return
     ext = os.path.splitext(path)[1].lower()
-    warning = size_warning(data, path, ext)
     custom = load(os.path.join(ROOT, ".claude", "checks.json"), {})
+    formatted = auto_format(path, ext, custom)
+    warning = "\n".join(x for x in (formatted, size_warning(data, path, ext)) if x) or None
     cmd = custom[ext] if ext in custom else default_cmd(ext)
     if not cmd:
         return warn(warning)
