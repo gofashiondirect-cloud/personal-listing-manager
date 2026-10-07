@@ -27,6 +27,7 @@
 - Clean: no dead code, debug prints or commented-out blocks; one formatter and linter per project; pinned dependencies with committed lockfiles.
 - Small, focused commits with clear messages; one change at a time so problems are easy to find and undo.
 - Keep README (run/test/deploy), CHANGELOG and CLAUDE.md conventions current when behaviour changes.
+- Enforced by hooks: edits are checked for debug prints, commented-out code, long functions (>60 lines), unsafe SQL/HTML/eval, empty or bare catches, secrets and low colour contrast; commits block on secrets, `.env` files, `fix:` without a test, `feat:` without a CHANGELOG line, and get a review step when large. Intended exceptions: add `kit-ignore: <reason>` on the line.
 
 ## Plan, research, prove
 - Anything bigger than a one-line fix starts with the `plan` skill: plan in `.claude/plans/current.md`, researched against (in order) the request, this project and `## Preferences`, saved notes in `.claude/research/`, official docs for the installed versions, then the standards in `.claude/standards/`.

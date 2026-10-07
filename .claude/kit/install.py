@@ -128,6 +128,21 @@ def main():
             shutil.copytree(KIT, kit_dst, dirs_exist_ok=True)
 
     if not a.glob:
+        root = os.path.dirname(dest_claude)
+        py = os.path.join(root, "pyproject.toml")
+        is_python = any(os.path.exists(os.path.join(root, f)) for f in ("pyproject.toml", "requirements.txt", "setup.py"))
+        has_ruff = (os.path.exists(os.path.join(root, "ruff.toml")) or os.path.exists(os.path.join(root, ".ruff.toml"))
+                    or (os.path.exists(py) and "[tool.ruff" in open(py, encoding="utf-8").read()))
+        if is_python and not has_ruff:
+            shutil.copy2(os.path.join(KIT, "configs", "ruff.toml"), os.path.join(root, "ruff.toml"))
+            print("ruff.toml added (core coding rules for Python)")
+        gi = os.path.join(root, ".gitignore")
+        current = open(gi, encoding="utf-8").read() if os.path.exists(gi) else ""
+        missing = [p for p in (".env", ".env.*", "!.env.example") if p not in current.split()]
+        if missing:
+            with open(gi, "a", encoding="utf-8") as f:
+                f.write(("\n" if current and not current.endswith("\n") else "") + "\n".join(missing) + "\n")
+
         sys.path.insert(0, hooks_dir)
         try:
             from ci import write as write_ci

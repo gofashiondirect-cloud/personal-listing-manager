@@ -25,6 +25,11 @@ def main():
         return deny("A plan is open (.claude/plans/current.md) and its final Review isn't done. Re-check the "
                     "request and Done-when, run the code-review skill on the diff, fix findings, tick Review "
                     "with what you checked, then commit.")
+    from commit_rules import problems
+    rule_issue = problems(cmd, tree_stamp(), bool(plan))
+    if rule_issue:
+        log_event("precommit", "rule", rule_issue[:40])
+        return deny(rule_issue)
     from stack import detect
     cmds = detect(ROOT)[1]
     from stack import database

@@ -45,7 +45,7 @@ def save(path, obj):
 
 
 def emit(obj):
-    print(json.dumps(obj))
+    print(json.dumps(obj))  # kit-ignore: stdout is the hook protocol
 
 
 def slug(text):

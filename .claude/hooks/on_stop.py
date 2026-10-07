@@ -249,9 +249,8 @@ def boot_check(flags):
     return f"The app no longer starts (`{cmd}`). Fix it before finishing:\n{tail}"
 
 
-def main():
-    data = read_input()
-    sid = data.get("session_id") or "unknown"
+def record_turn(data, sid):
+    """Usage log and checkpoint for every turn. Returns the session's tool-call count."""
     totals, tools, model = scan_transcript(data.get("transcript_path"))
     try:
         log_usage(sid, totals, model)
@@ -260,9 +259,70 @@ def main():
     try:
         from checkpoint import create
         create(f"end of turn ({sid[:8]})")
-    except Exception:
+    except Exception:  # kit-ignore: a failed checkpoint must never block the user
         pass
+    return tools
 
+
+def quality_gate(sid, flags):
+    """Migration, tests, links, boot and visual checks. Returns a failure message or None."""
+    from checks import run, stop_checks
+    active = stop_checks(sid)
+    heavy = {"tests": related_tests, "links": broken_links, "boot": boot_check, "visual": visual_changes}
+    return missing_migration(flags) or run({n: f for n, f in heavy.items() if n in active}, flags)
+
+
+def plan_gate(flags):
+    """Open plan items without proof. Returns a message or None (at most 4 times per session)."""
+    from plan_check import open_plan, unproven
+    plan = open_plan(ROOT)
+    if not plan or flags.get("plan_blocks", 0) >= 4:
+        return None
+    missing = unproven(plan)
+    if not missing:
+        return None
+    flags["plan_blocks"] = flags.get("plan_blocks", 0) + 1
+    return ("The plan in .claude/plans/current.md isn't finished. Complete each item and add its proof "
+            "(`- proof: ...`), or mark it `- dropped: <reason>`; if the user should decide, ask them:\n"
+            + "\n".join(missing[:15]))
+
+
+def housekeeping_gate(sid, flags):
+    """Project map, skill size, task label and skill creation. Returns (flag, message) or None."""
+    if not flags.get("map"):
+        missing = unmapped_paths()
+        if missing:
+            return "map", ("Before finishing: add these new top-level paths to the '## Project map' section "
+                           "of CLAUDE.md, one short line each: " + ", ".join(missing))
+    if not flags.get("skillsize"):
+        big = long_skills()
+        if big:
+            return "skillsize", (f"Skill file(s) over {SKILL_MAX_LINES} lines: {', '.join(big)}. Before "
+                                 "finishing, keep only the steps in SKILL.md and move long reference material "
+                                 "into separate files in the skill folder that SKILL.md points to.")
+    task_log = f'{PY} "{os.path.join(HOOKS, "task_log.py")}"'
+    label = load(session_path(sid, "label.json"), {}).get("label")
+    log = load(os.path.join(state_dir(), "task-log.json"), {"tasks": [], "skills": {}})
+    if not label and not flags.get("label"):
+        known = sorted({e["label"] for e in log["tasks"]})[-30:]
+        return "label", ("Before finishing: record a 2-4 word label for the kind of task done this session "
+                         f"by running: {task_log} add \"<label>\" {sid}. "
+                         + (f"Reuse one of these if it is the same kind of task: {known}. " if known else "")
+                         + "Then finish normally.")
+    if label and not flags.get("skill"):
+        n = sum(1 for e in log["tasks"] if slug(e["label"]) == slug(label))
+        if n >= SKILL_AFTER and slug(label) not in log.get("skills", {}):
+            return "skill", (f"'{label}' has now been done {n} times with no skill. Before finishing, create "
+                             f".claude/skills/{slug(label)}/SKILL.md (frontmatter: name, description saying when "
+                             "to use it; body: the concise, tested steps from this session), then run: "
+                             f"{task_log} skill \"{label}\" {slug(label)}")
+    return None
+
+
+def main():
+    data = read_input()
+    sid = data.get("session_id") or "unknown"
+    tools = record_turn(data, sid)
     flags_file = session_path(sid, "stop.json")
     flags = load(flags_file, {"blocks": 0})
     if tools < 3 or flags["blocks"] >= MAX_BLOCKS:
@@ -274,58 +334,17 @@ def main():
         save(flags_file, flags)
         emit({"decision": "block", "reason": reason})
 
-    from checks import run, stop_checks
-    active = stop_checks(sid)
-    heavy = {"tests": related_tests, "links": broken_links, "boot": boot_check, "visual": visual_changes}
-    failing = missing_migration(flags) or run({n: f for n, f in heavy.items() if n in active}, flags)
+    failing = quality_gate(sid, flags)
     save(flags_file, flags)
     if failing:
         return block("tests", failing)
-
-    from plan_check import open_plan, unproven
-    plan = open_plan(ROOT)
-    if plan and flags.get("plan_blocks", 0) < 4:
-        missing = unproven(plan)
-        if missing:
-            flags["plan_blocks"] = flags.get("plan_blocks", 0) + 1
-            save(flags_file, flags)
-            return emit({"decision": "block", "reason": (
-                "The plan in .claude/plans/current.md isn't finished. Complete each item and add its proof "
-                "(`- proof: ...`), or mark it `- dropped: <reason>`; if the user should decide, ask them:\n"
-                + "\n".join(missing[:15]))})
-
-    if not flags.get("map"):
-        missing = unmapped_paths()
-        if missing:
-            return block("map", "Before finishing: add these new top-level paths to the "
-                         "'## Project map' section of CLAUDE.md, one short line each: "
-                         + ", ".join(missing))
-
-    if not flags.get("skillsize"):
-        big = long_skills()
-        if big:
-            return block("skillsize", f"Skill file(s) over {SKILL_MAX_LINES} lines: {', '.join(big)}. Before "
-                         "finishing, keep only the steps in SKILL.md and move long reference material into "
-                         "separate files in the skill folder that SKILL.md points to (loaded only when needed).")
-
-    task_log = f'{PY} "{os.path.join(HOOKS, "task_log.py")}"'
-    label = load(session_path(sid, "label.json"), {}).get("label")
-    if not label and not flags.get("label"):
-        log = load(os.path.join(state_dir(), "task-log.json"), {"tasks": []})
-        known = sorted({e["label"] for e in log["tasks"]})[-30:]
-        return block("label", "Before finishing: record a 2-4 word label for the kind of task "
-                     f"done this session by running: {task_log} add \"<label>\" {sid}. "
-                     + (f"Reuse one of these if it is the same kind of task: {known}. " if known else "")
-                     + "Then finish normally.")
-
-    if label and not flags.get("skill"):
-        log = load(os.path.join(state_dir(), "task-log.json"), {"tasks": [], "skills": {}})
-        n = sum(1 for e in log["tasks"] if slug(e["label"]) == slug(label))
-        if n >= SKILL_AFTER and slug(label) not in log.get("skills", {}):
-            return block("skill", f"'{label}' has now been done {n} times with no skill. Before finishing, "
-                         f"create .claude/skills/{slug(label)}/SKILL.md (frontmatter: name, description "
-                         "saying when to use it; body: the concise, tested steps from this session), "
-                         f"then run: {task_log} skill \"{label}\" {slug(label)}")
+    unfinished = plan_gate(flags)
+    if unfinished:
+        save(flags_file, flags)
+        return emit({"decision": "block", "reason": unfinished})
+    chore = housekeeping_gate(sid, flags)
+    if chore:
+        block(*chore)
 
 
 if __name__ == "__main__":

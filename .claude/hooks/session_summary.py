@@ -112,4 +112,4 @@ try:
         lines.append("Kit auto-tuned today: " + "; ".join(changes))
 except Exception:
     pass
-print("\n".join(lines))
+print("\n".join(lines))  # kit-ignore: stdout is the hook protocol

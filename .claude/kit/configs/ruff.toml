@@ -1,0 +1,24 @@
+# Installed by claude-kit: enforces the core coding rules for Python. Edit freely; the kit won't overwrite it.
+line-length = 100
+
+[lint]
+select = [
+  "E", "F", "W",   # pycodestyle + pyflakes: errors, unused imports/variables
+  "B",             # bugbear: likely bugs
+  "S",             # bandit: security (SQL injection, eval, hard-coded secrets, shell=True)
+  "T20",           # no print() / pdb left in code
+  "ERA",           # no commented-out code
+  "C90",           # complexity
+  "BLE",           # no blind `except Exception`
+  "SIM", "UP",     # simpler, modern Python
+  "N",             # naming conventions
+]
+ignore = ["E501"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "T20"]
+"test_*.py" = ["S101", "T20"]
+"*_test.py" = ["S101", "T20"]

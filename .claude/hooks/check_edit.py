@@ -112,6 +112,24 @@ def caller_note(data, path):
     return "\n".join(notes) or None
 
 
+def rule_problems(data, path):
+    """Core-rule violations in the lines this edit touched (whole file for Write)."""
+    if not setting("CLAUDE_RULE_CHECKS", 1):
+        return []
+    from codecheck import check, region_for
+    text = open(path, encoding="utf-8", errors="replace").read()
+    inp = data.get("tool_input") or {}
+    if data.get("tool_name") == "Write" or "content" in inp:
+        region = None
+    else:
+        news = [e.get("new_string") for e in inp.get("edits", [])] or [inp.get("new_string")]
+        regions = [r for r in (region_for(text, n) for n in news if n) if r]
+        if not regions:
+            return []
+        region = (min(r[0] for r in regions), max(r[1] for r in regions))
+    return check(path, text, region)
+
+
 def main():
     data = read_input()
     path = (data.get("tool_input") or {}).get("file_path")
@@ -121,6 +139,13 @@ def main():
     custom = load(os.path.join(ROOT, ".claude", "checks.json"), {})
     formatted = auto_format(path, ext, custom)
     warning = "\n".join(x for x in (formatted, size_warning(data, path, ext), caller_note(data, path)) if x) or None
+    rules = rule_problems(data, path)
+    if rules:
+        log_event("rules", "block", ext)
+        return emit({"decision": "block", "reason":
+                     f"{os.path.relpath(path, ROOT)} breaks the core coding rules:\n" + "\n".join(rules[:20])
+                     + "\nFix these now. If one is genuinely intended, add `kit-ignore: <reason>` on that line."
+                     + (f"\n{warning}" if warning else "")})
     cmd = custom[ext] if ext in custom else default_cmd(ext)
     if not cmd:
         return warn(warning)
