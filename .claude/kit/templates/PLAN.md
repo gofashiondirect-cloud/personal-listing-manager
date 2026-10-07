@@ -6,6 +6,10 @@ Done when: <what the user sees or can do, and the check that proves it>
 ## Changes (follow pattern: <closest existing example>)
 - [ ] <file>: <change>
 
+## Design
+- [ ] architecture: where it lives, layers, boundaries (standards/architecture.md)
+- [ ] UX: feedback, errors, empty states, mobile (standards/ux.md)
+
 ## Standards
 - [ ] <file type> checklist met (.claude/standards/<type>.md)
 

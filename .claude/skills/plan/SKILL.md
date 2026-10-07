@@ -18,7 +18,7 @@ Copy `.claude/kit/templates/PLAN.md` (or `~/.claude/templates/PLAN.md`) to `.cla
 2. **The project.** CLAUDE.md, `## Preferences`, the project map, the closest existing feature (follow its pattern), installed versions in package.json / requirements / lockfiles.
 3. **Saved research.** `.claude/research/*.md` notes newer than ~90 days: reuse them.
 4. **Official docs, live, for the installed versions** (react.dev, nextjs.org, docs.djangoproject.com, MDN, the library's changelog). Delegate to a subagent: "check X in the docs for version Y; reply in under 150 words with links".
-5. **Standards.** `.claude/standards/*.md` for each file type, plus WCAG 2.2 AA (accessibility), OWASP Top 10 (security), Core Web Vitals (speed), the language style guide.
+5. **Standards.** `.claude/standards/architecture.md` (where code goes, layers, boundaries), `ux.md` for anything users see, and the checklist for each file type, plus WCAG 2.2 AA (accessibility), OWASP Top 10 (security), Core Web Vitals (speed), the language style guide.
 Fix the plan with what you learn. Save anything reusable to `.claude/research/<topic>.md` (date, versions, findings, links; under 30 lines).
 
 ## 4. Build against the plan

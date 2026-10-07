@@ -8,9 +8,9 @@ import os, re
 from _kit import safe_run, ROOT, HOOKS, read_input, session_path, load, save, emit
 
 RULES = [
-    (r"\.(html?|njk|hbs|ejs)$", ["html"]),
-    (r"\.(css|scss|sass|less)$", ["css"]),
-    (r"\.(jsx|tsx)$", ["react", "javascript"]),
+    (r"\.(html?|njk|hbs|ejs)$", ["html", "ux"]),
+    (r"\.(css|scss|sass|less)$", ["css", "ux"]),
+    (r"\.(jsx|tsx|vue|svelte)$", ["react", "javascript", "ux"]),
     (r"\.(js|mjs|cjs|ts)$", ["javascript"]),
     (r"\.py$", ["python"]),
     (r"(\.sql$|(^|/)migrations?/|(^|/)db/migrate/|schema\.prisma$)", ["sql"]),
@@ -43,7 +43,7 @@ def main():
     rel = os.path.relpath(path, ROOT).replace(os.sep, "/") if path else ""
     if not rel or rel.startswith((".claude/", "..")):
         return
-    wanted = []
+    wanted = ["architecture"] if data.get("tool_name") == "Write" and not os.path.exists(path) else []
     for rx, names in RULES:
         if re.search(rx, rel, re.I):
             wanted += [n for n in names if n not in wanted]

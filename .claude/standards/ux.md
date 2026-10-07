@@ -1,0 +1,14 @@
+# UX principles (sources: Nielsen's 10 usability heuristics, WCAG 2.2, Material/Apple HIG)
+- Visibility of system status: every action gives feedback (loading spinner, success message, disabled button while saving).
+- Speak the user's language: plain words, no internal jargon or raw error codes.
+- User control: easy undo/cancel/back; confirm only destructive actions.
+- Consistency: same words, colours, button styles and positions for the same things across the app.
+- Prevent errors: sensible defaults, input constraints, inline validation before submit.
+- Recognition over recall: show options and recent items; keep labels visible (not only placeholders).
+- Efficiency: shortcuts for frequent tasks, minimal steps, remember the user's choices.
+- Minimalist design: one primary action per screen, clear visual hierarchy, generous spacing; remove what isn't needed.
+- Help users recover: error messages say what went wrong and how to fix it, next to the field.
+- Empty states explain what goes here and offer the first action.
+- Mobile first: tap targets at least 44x44px, readable without zoom, works one-handed.
+- Accessible to everyone: keyboard, screen reader, contrast, reduced motion (see html/css standards).
+- Fast feel: show content quickly (skeletons, optimistic updates), never block the whole screen for one item.

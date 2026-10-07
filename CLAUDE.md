@@ -45,6 +45,7 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 - User-facing: accessible (labels, alt, keyboard, contrast), fast (optimised images, no blocking scripts), works on mobile.
 - Clean: no dead code, debug prints or commented-out blocks; one formatter and linter per project; pinned dependencies with committed lockfiles.
 - Small, focused commits with clear messages; one change at a time so problems are easy to find and undo.
+- Well designed, not just well coded: follow `.claude/standards/architecture.md` for structure and `ux.md` for anything users see.
 - Keep README (run/test/deploy), CHANGELOG and CLAUDE.md conventions current when behaviour changes.
 - Enforced by hooks: edits are checked for debug prints, commented-out code, long functions (>60 lines), unsafe SQL/HTML/eval, empty or bare catches, secrets and low colour contrast; commits block on secrets, `.env` files, `fix:` without a test, `feat:` without a CHANGELOG line, and get a review step when large. Intended exceptions: add `kit-ignore: <reason>` on the line.
 
