@@ -8,11 +8,11 @@ In order, once per session each:
 Trivial turns (fewer than 3 tool calls in the session) are never blocked.
 """
 import csv, json, os, subprocess
-from _kit import (ROOT, HOOKS, PY, read_input, state_dir, session_path, load, save,
+from _kit import (setting, safe_run, log_event, ROOT, HOOKS, PY, read_input, state_dir, session_path, load, save,
                   emit, slug, project_name, today)
 
-SKILL_AFTER = int(os.environ.get("CLAUDE_SKILL_AFTER", "3"))
-SKILL_MAX_LINES = int(os.environ.get("CLAUDE_SKILL_MAX_LINES", "60"))
+SKILL_AFTER = setting("CLAUDE_SKILL_AFTER", 3)
+SKILL_MAX_LINES = setting("CLAUDE_SKILL_MAX_LINES", 60)
 MAX_BLOCKS = 3
 
 
@@ -156,4 +156,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

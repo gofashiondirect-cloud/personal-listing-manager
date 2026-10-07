@@ -6,9 +6,9 @@
   task_log.py list                     show labels, counts and skills
 """
 import json, os, sys
-from _kit import state_dir, session_path, load, save, slug, project_name, today
+from _kit import setting, safe_run, log_event, state_dir, session_path, load, save, slug, project_name, today
 
-SKILL_AFTER = int(os.environ.get("CLAUDE_SKILL_AFTER", "3"))
+SKILL_AFTER = setting("CLAUDE_SKILL_AFTER", 3)
 LOG = os.path.join(state_dir(), "task-log.json")
 
 
@@ -48,4 +48,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

@@ -5,10 +5,10 @@ Per-project overrides in .claude/checks.json, e.g. {".ts": "npx --no-install tsc
 An empty string disables checks for that extension.
 """
 import os, shutil, subprocess
-from _kit import ROOT, PY, read_input, load, save, session_path, emit
+from _kit import setting, safe_run, log_event, ROOT, PY, read_input, load, save, session_path, emit
 
-TIMEOUT = int(os.environ.get("CLAUDE_CHECK_TIMEOUT", "60"))
-MAX_FILE_LINES = int(os.environ.get("CLAUDE_MAX_FILE_LINES", "400"))
+TIMEOUT = setting("CLAUDE_CHECK_TIMEOUT", 60)
+MAX_FILE_LINES = setting("CLAUDE_MAX_FILE_LINES", 400)
 CODE_EXT = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".kt", ".rb",
             ".php", ".cs", ".swift", ".vue", ".svelte", ".css", ".scss", ".html", ".sh"}
 
@@ -76,4 +76,4 @@ def warn(warning):
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

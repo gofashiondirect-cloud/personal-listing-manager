@@ -11,18 +11,20 @@ Tune: CLAUDE_TRIM_MAX_LINES (200), CLAUDE_TRIM_KEEP (60), CLAUDE_TRIM_MAX_CHARS 
       CLAUDE_TRIM_MAX_ITEMS (50).
 """
 import json, os, re, tempfile, time
-from _kit import read_input, emit
+from _kit import setting, safe_run, log_event, read_input, emit
 
-MAX_LINES = int(os.environ.get("CLAUDE_TRIM_MAX_LINES", "200"))
-KEEP = int(os.environ.get("CLAUDE_TRIM_KEEP", "60"))
-MAX_CHARS = int(os.environ.get("CLAUDE_TRIM_MAX_CHARS", "12000"))
-MAX_ITEMS = int(os.environ.get("CLAUDE_TRIM_MAX_ITEMS", "50"))
+MAX_LINES = setting("CLAUDE_TRIM_MAX_LINES", 200)
+KEEP = setting("CLAUDE_TRIM_KEEP", 60)
+MAX_CHARS = setting("CLAUDE_TRIM_MAX_CHARS", 12000)
+MAX_ITEMS = setting("CLAUDE_TRIM_MAX_ITEMS", 50)
 ERR = re.compile(r"error|fail|exception|traceback|panic|fatal|warn", re.I)
 NOISE = re.compile(r"(^|_)(node_id|avatar_url|gravatar_id|etag|_links|.+_url)$")
+TOOL = ""
 KEEP_URLS = {"url", "html_url", "web_url", "webUrl"}
 
 
 def save_full(obj):
+    log_event("trim", "trimmed", TOOL)
     fd, path = tempfile.mkstemp(prefix=f"claude-out-{int(time.time())}-", suffix=".log")
     with os.fdopen(fd, "w", encoding="utf-8", errors="replace") as f:
         f.write(obj if isinstance(obj, str) else json.dumps(obj, indent=1, default=str))
@@ -88,7 +90,9 @@ def mcp_text(resp):
 
 def main():
     data = read_input()
+    global TOOL
     tool, resp = data.get("tool_name", ""), data.get("tool_response")
+    TOOL = tool
     if resp is None or tool == "Agent":
         return
     size = len(json.dumps(resp, default=str))
@@ -131,4 +135,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

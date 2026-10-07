@@ -6,10 +6,10 @@
 Tune: CLAUDE_HINT_MAX_FILES (8), CLAUDE_PASTE_LINES (60).
 """
 import os, re, subprocess
-from _kit import ROOT, read_input, emit
+from _kit import setting, safe_run, log_event, ROOT, read_input, emit
 
-MAX_FILES = int(os.environ.get("CLAUDE_HINT_MAX_FILES", "8"))
-PASTE_LINES = int(os.environ.get("CLAUDE_PASTE_LINES", "60"))
+MAX_FILES = setting("CLAUDE_HINT_MAX_FILES", 8)
+PASTE_LINES = setting("CLAUDE_PASTE_LINES", 60)
 ERR = re.compile(r"error|exception|traceback|fail|fatal|panic|denied|not found|undefined|cannot|\bat \S+:\d+", re.I)
 STOP = set("""about above after again all also and any are because been before being below between both but
 can could did does doing done down during each few for from further had has have having her here him his how
@@ -77,4 +77,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

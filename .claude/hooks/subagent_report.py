@@ -4,9 +4,9 @@
 Tune: CLAUDE_SUBAGENT_MAX_CHARS (3000, about 450 words).
 """
 import os
-from _kit import read_input, emit
+from _kit import setting, safe_run, log_event, read_input, emit
 
-MAX_CHARS = int(os.environ.get("CLAUDE_SUBAGENT_MAX_CHARS", "3000"))
+MAX_CHARS = setting("CLAUDE_SUBAGENT_MAX_CHARS", 3000)
 
 
 def main():
@@ -21,4 +21,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

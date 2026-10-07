@@ -6,9 +6,9 @@ State resets on compaction (see session_summary.py).
 Tune: CLAUDE_READ_MAX_LINES (default 500).
 """
 import os
-from _kit import read_input, session_path, load, save, emit
+from _kit import setting, safe_run, log_event, read_input, session_path, load, save, emit
 
-MAX_LINES = int(os.environ.get("CLAUDE_READ_MAX_LINES", "500"))
+MAX_LINES = setting("CLAUDE_READ_MAX_LINES", 500)
 SKIP_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".pdf", ".ipynb", ".svg"}
 
 
@@ -23,6 +23,8 @@ def main():
     path = inp.get("file_path")
     if not path or not os.path.isfile(path):
         return
+    if "claude-out-" in os.path.basename(path):
+        log_event("trim", "used_full")
     ranged = bool(inp.get("limit") or inp.get("offset"))
 
     # 1. Repeat-read guard
@@ -31,7 +33,11 @@ def main():
     key = f"{os.path.abspath(path)}|{inp.get('offset')}|{inp.get('limit')}"
     mtime = os.path.getmtime(path)
     prev = reads.get(key)
-    if prev and prev[0] == mtime and not prev[1]:
+    repeat_guard = setting("CLAUDE_REPEAT_READ_GUARD", 1)
+    if prev and prev[0] == mtime and prev[1] and repeat_guard:
+        log_event("guard_read", "override", "repeat")
+    if prev and prev[0] == mtime and not prev[1] and repeat_guard:
+        log_event("guard_read", "deny", "repeat")
         reads[key] = [mtime, 1]
         save(state_file, reads)
         return deny(f"You already read this exact range of {path} and it hasn't changed since; "
@@ -49,6 +55,7 @@ def main():
     except OSError:
         return
     if n > MAX_LINES:
+        log_event("guard_read", "deny", "large")
         reads.pop(key, None)
         save(state_file, reads)
         deny(f"{path} has {n} lines (limit {MAX_LINES}). Grep for what you need, "
@@ -56,4 +63,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

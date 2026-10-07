@@ -58,3 +58,43 @@ def project_name():
 
 def today():
     return time.strftime("%Y-%m-%d")
+
+
+def tuning():
+    return load(os.path.join(state_dir(), "tuning.json"), {})
+
+
+def setting(name, default):
+    """Env var wins, then the auto-tuned value (tune.py), then the default."""
+    if name in os.environ:
+        return type(default)(os.environ[name])
+    return type(default)(tuning().get(name, default))
+
+
+def log_event(hook, kind, key=""):
+    """Append one guard/trim event; tune.py reads these to adjust limits."""
+    try:
+        path = os.path.join(state_dir(), "events.jsonl")
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"date": today(), "hook": hook, "kind": kind, "key": key}) + "\n")
+        if os.path.getsize(path) > 400_000:  # keep the newest ~2000 events
+            lines = open(path, encoding="utf-8").readlines()[-2000:]
+            with open(path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+    except OSError:
+        pass
+
+
+def safe_run(main):
+    """A hook must never break the session: log the error and exit quietly."""
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        try:
+            with open(os.path.join(state_dir(), "hook-errors.log"), "a", encoding="utf-8") as f:
+                f.write(f"{time.strftime('%Y-%m-%d %H:%M')} {os.path.basename(sys.argv[0])}: "
+                        f"{type(e).__name__}: {e}\n")
+        except OSError:
+            pass

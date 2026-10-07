@@ -5,9 +5,9 @@ Each blocked command is allowed if Claude sends the exact same command again.
 Tune: CLAUDE_READ_MAX_LINES (500) for `cat` on large files.
 """
 import os, re, shlex
-from _kit import ROOT, read_input, session_path, load, save, emit
+from _kit import tuning, setting, safe_run, log_event, ROOT, read_input, session_path, load, save, emit
 
-MAX_LINES = int(os.environ.get("CLAUDE_READ_MAX_LINES", "500"))
+MAX_LINES = setting("CLAUDE_READ_MAX_LINES", 500)
 
 
 def line_count(path):
@@ -38,36 +38,40 @@ def problem(cmd):
                 args = []
             big = [a for a in args if line_count(os.path.join(ROOT, a) if not os.path.isabs(a) else a) > MAX_LINES]
             if big:
-                return f"`cat` on large file(s) {big}: use grep, or the Read tool with offset/limit."
+                return "cat", f"`cat` on large file(s) {big}: use grep, or the Read tool with offset/limit."
     if re.search(r"\bfind\s+(/|~|\$HOME)(\s|$)", cmd) and "-maxdepth" not in cmd:
-        return "`find` over the whole filesystem/home: search within the project, or add -maxdepth."
+        return "find", "`find` over the whole filesystem/home: search within the project, or add -maxdepth."
     if re.search(r"\bgit\s+(log|reflog)\b", cmd) and not re.search(r"(-n\s*\d+|\s-\d+|--max-count|\|\s*head)", cmd):
-        return "Unbounded `git log`: add -n 20 (and --oneline if you only need subjects)."
+        return "gitlog", "Unbounded `git log`: add -n 20 (and --oneline if you only need subjects)."
     if re.search(r"\bls\s+(-\w*R|--recursive)", cmd) and not limited:
-        return "Recursive `ls`: use the Glob tool, or pipe through head."
+        return "lsR", "Recursive `ls`: use the Glob tool, or pipe through head."
     if re.search(r"\btree\b", cmd) and not re.search(r"-L\s*\d", cmd) and not limited:
-        return "`tree` without depth: add -L 2."
+        return "tree", "`tree` without depth: add -L 2."
     if re.fullmatch(r"\s*(npm\s+(install|i|ci)|pnpm\s+install|yarn(\s+install)?)\s*", cmd) and deps_current():
-        return "Dependencies already installed and up to date with package.json/lockfiles; skip the install."
+        return "deps", "Dependencies already installed and up to date with package.json/lockfiles; skip the install."
     if re.search(r"\b(npm|pnpm|yarn)\s+(install|i|ci|add)\b", cmd) and not limited and "--silent" not in cmd and "--quiet" not in cmd:
-        return "Package installs print long logs: add --silent (npm/pnpm) or pipe through tail -20."
-    return None
+        return "install", "Package installs print long logs: add --silent (npm/pnpm) or pipe through tail -20."
+    return None, None
 
 
 def main():
     data = read_input()
     cmd = (data.get("tool_input") or {}).get("command") or ""
-    reason = problem(cmd)
-    if not reason:
+    if "claude-out-" in cmd:
+        log_event("trim", "used_full")
+    key, reason = problem(cmd)
+    if not reason or key in tuning().get("disabled_bash_rules", []):
         return
     state_file = session_path(data.get("session_id"), "bash-denied.json")
     denied = load(state_file, [])
     if cmd in denied:
+        log_event("guard_bash", "override", key)
         return  # second identical attempt: Claude insists, allow it
     save(state_file, denied + [cmd])
+    log_event("guard_bash", "deny", key)
     emit({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
           "permissionDecisionReason": reason + " (If you really need it as written, run the exact same command again.)"}})
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)

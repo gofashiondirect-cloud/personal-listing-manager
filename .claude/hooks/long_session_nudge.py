@@ -6,7 +6,10 @@ Tune with env var CLAUDE_NUDGE_KB (default 400 KB of transcript).
 """
 import json, os, sys
 
-LIMIT_KB = int(os.environ.get("CLAUDE_NUDGE_KB", "400"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _kit import setting, safe_run
+
+LIMIT_KB = setting("CLAUDE_NUDGE_KB", 400)
 
 
 def main():
@@ -32,4 +35,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    safe_run(main)
