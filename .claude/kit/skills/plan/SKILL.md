@@ -25,8 +25,8 @@ Fix the plan with what you learn. Save anything reusable to `.claude/research/<t
 ## 4. Build against the plan
 Tick an item only with proof written after it: `- [x] item - proof: tests/test_cart.py::test_coupon passes` or `- proof: src/cart.ts:42`, `- proof: htmlcheck OK`, `- proof: visual diff reviewed, only header changed`. The Stop hook blocks finishing while any item is unticked or lacks proof. If an item turns out unnecessary, change it to `- [x] item - dropped: <reason>`.
 
-## 5. Sign-off per discipline
-The Stop hook works out which disciplines the changed files touch (Engineering per language, Architecture for new files, UX/UI, QA, Database, API, Privacy & security, DevOps) and requires one ticked line each under `## Sign-off`, e.g. `- [x] UX/UI: ux.md met - proof: empty state + error message added (index.html:40), visual diff reviewed`. Use `n/a: <reason>` only if the standard genuinely doesn't apply.
+## 5. Discipline record (dated checklist)
+Once you know which files change, run `python3 .claude/hooks/records.py new <slug>` (global install: `~/.claude/hooks/records.py`). It creates `.claude/records/<date>-<slug>.md` with the full checklist of every discipline the changes touch (Engineering per language, Architecture, UX/UI, QA, Database, API, Privacy & security, DevOps) and links it from the plan. Fill every item as `- [x] item - note: how/where (file:line, check, test)` or `- [x] item - n/a: reason`. If you touch more disciplines later, the Stop hook adds their sections. Records are committed: they are the audit trail.
 
 ## 6. Final review (before commit)
 - Re-read the user's request and the plan's "Done when"; confirm each point.

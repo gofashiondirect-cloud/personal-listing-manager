@@ -1,5 +1,6 @@
 # Plan: <short title>
 Status: in progress
+Record: none yet (run records.py new <slug>)
 Request: <the user's words, short>
 Done when: <what the user sees or can do, and the check that proves it>
 
@@ -34,8 +35,8 @@ Done when: <what the user sees or can do, and the check that proves it>
 ## Undo
 - [ ] rollback path: /undo checkpoint or revert commit
 
-## Sign-off (one line per discipline this change touches; the Stop hook lists any missing)
-- [ ] <Discipline>: <standard file> checklist met - proof: <check result / file:line / test>
+## Discipline record
+- [ ] checklist record filled for every discipline touched (`records.py new <slug>`; the Stop hook lists gaps) - proof: <record path>
 
 ## Review
 - [ ] request and Done-when re-checked; code-review run, findings fixed

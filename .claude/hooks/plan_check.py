@@ -49,7 +49,12 @@ DISCIPLINE = {  # standard -> sign-off name shown in the plan
 
 
 def required_signoffs(root):
-    """Disciplines the current changes touch, from the changed and new files."""
+    """Discipline names the current changes touch."""
+    return sorted({DISCIPLINE[n] for n in required_standards(root)})
+
+
+def required_standards(root):
+    """Standard keys (html, ux, privacy, ...) the current changes touch, from the changed and new files."""
     import subprocess
     from standards import RULES
     out = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=root,
@@ -66,7 +71,7 @@ def required_signoffs(root):
                 needed.update(names)
     if needed & {"html", "css", "javascript", "react", "python", "sql", "api"}:
         needed.add("tests")
-    return sorted({DISCIPLINE[n] for n in needed if n in DISCIPLINE})
+    return sorted(n for n in needed if n in DISCIPLINE)
 
 
 def missing_signoffs(text, required):

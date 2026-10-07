@@ -272,15 +272,31 @@ def quality_gate(sid, flags):
     return missing_migration(flags) or run({n: f for n, f in heavy.items() if n in active}, flags)
 
 
+def record_gaps():
+    """Open items in the plan's dated discipline record (created/extended automatically)."""
+    import records
+    from plan_check import required_standards
+    if not required_standards(ROOT):
+        return []
+    path = records.current_record()
+    if not path or not os.path.exists(path):
+        return [f"[Record] create the discipline checklist record: {PY} \"{os.path.join(HOOKS, 'records.py')}\" "
+                "new <short-slug>, then fill every item with `- note:` or `- n/a:`"]
+    added = records.sync(path)
+    rel = os.path.relpath(path, ROOT)
+    gaps = [f"[Record {rel}] {g}" for g in records.unfinished(path)]
+    if added:
+        gaps.insert(0, f"[Record {rel}] new disciplines touched, sections added: {', '.join(added)}")
+    return gaps
+
+
 def plan_gate(flags):
     """Open plan items without proof. Returns a message or None (at most 4 times per session)."""
     from plan_check import open_plan, unproven
     plan = open_plan(ROOT)
     if not plan or flags.get("plan_blocks", 0) >= 4:
         return None
-    from plan_check import required_signoffs, missing_signoffs
-    missing = unproven(plan) + [f"[Sign-off] add and prove: - [x] {d}: standard met - proof: ..."
-                                for d in missing_signoffs(plan, required_signoffs(ROOT))]
+    missing = record_gaps() + unproven(plan)
     if not missing:
         return None
     flags["plan_blocks"] = flags.get("plan_blocks", 0) + 1
