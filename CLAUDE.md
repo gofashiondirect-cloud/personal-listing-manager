@@ -23,10 +23,17 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 - Subagents: give them a narrow question and ask for a short answer (conclusion + file:line refs).
 - Trimmed results point to a full-output file: grep that file rather than re-running the command.
 
+## Working style
+- Before a non-trivial task, state in one line what "done" means (e.g. "done when `npm test cart` passes and the total updates"), then stop when it is met.
+- If a task will touch more than ~3 files or has several reasonable approaches, write a 3-6 line plan first and follow it.
+- Run only the tests related to what changed (a single file or `-k` filter); run the full suite only before committing a larger change.
+- Keep files small and well named (guideline: under ~400 lines); split when a file grows past that and the task allows it.
+- When a message includes "Likely relevant files", check those first before searching.
+
 ## Self-improvement (hooks enforce the first three)
 - Keep the `## Project map` in CLAUDE.md current when adding top-level files or folders.
 - When asked by the Stop hook, record a task label; reuse an existing label for the same kind of task.
-- When a task repeats, write a skill: `.claude/skills/<name>/SKILL.md` with `name` and a `description` saying when to use it, then the concise, tested steps.
+- When a task repeats, write a skill: `.claude/skills/<name>/SKILL.md` with `name` and a `description` saying when to use it, then the concise, tested steps. Keep SKILL.md under ~60 lines; put long reference material in separate files in the skill folder and point to them.
 - If a read turned out to be useless bulk (generated, vendored, data, fixtures), add a `Read(...)` deny rule for it to `.claude/settings.json`.
 - When fixing a bug in a project that has tests, add a test that would have caught it.
 - If a hook's check fails after an edit, fix it before continuing.
@@ -36,11 +43,20 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 Keep: the user's goal, decisions made, open tasks, files changed and key file:line references, and failing commands with their error lines.
 Drop: file contents, full logs, search results, and exploration that led nowhere.
 
+## Writing routines, scheduled jobs and automations
+- Use the cheapest model that does the job (Haiku or Sonnet; Opus only if the job needs hard reasoning).
+- Start with a quick exit: if nothing changed since the last run (no new commits, files, messages or data), stop immediately.
+- Pick the lowest frequency that still meets the need (daily over hourly, weekly over daily).
+- For one-shot scripted jobs, use `claude -p "<task>"` (no chat history) instead of an interactive session.
+- Keep prompts self-contained and short; point to files instead of pasting their contents.
+
 ## Building apps that call the Claude API
 - Put stable content (system prompt, tool definitions, reference docs) first and mark it for prompt caching.
 - Pick the cheapest model that meets the quality bar: Haiku for classification, extraction and routing; Sonnet for general work; Opus only for hard reasoning.
 - Always set `max_tokens`; ask for concise or structured (JSON) output.
 - Use the Message Batches API for non-urgent bulk jobs.
 - Don't resend whole histories or large documents every call: trim, summarise, or retrieve only relevant chunks.
+- Cache answers to repeated questions (keyed on the normalised input) instead of calling the model again.
+- Send only relevant chunks: retrieve with search or embeddings rather than including whole documents.
 - Log token usage per request so costs are visible.
 <!-- claude-kit:end -->

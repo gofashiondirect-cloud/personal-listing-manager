@@ -12,6 +12,7 @@ from _kit import (ROOT, HOOKS, PY, read_input, state_dir, session_path, load, sa
                   emit, slug, project_name, today)
 
 SKILL_AFTER = int(os.environ.get("CLAUDE_SKILL_AFTER", "3"))
+SKILL_MAX_LINES = int(os.environ.get("CLAUDE_SKILL_MAX_LINES", "60"))
 MAX_BLOCKS = 3
 
 
@@ -80,6 +81,26 @@ def unmapped_paths():
     return sorted(t for t in tops if t not in text)
 
 
+def long_skills():
+    """SKILL.md files changed this session that exceed the size guideline."""
+    try:
+        out = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=ROOT,
+                             capture_output=True, text=True, timeout=5).stdout
+    except Exception:
+        return []
+    found = []
+    for line in out.splitlines():
+        p = line[3:].strip().strip('"')
+        if p.endswith("SKILL.md"):
+            try:
+                n = sum(1 for _ in open(os.path.join(ROOT, p), encoding="utf-8"))
+            except OSError:
+                continue
+            if n > SKILL_MAX_LINES:
+                found.append(f"{p} ({n} lines)")
+    return found
+
+
 def main():
     data = read_input()
     sid = data.get("session_id") or "unknown"
@@ -106,6 +127,13 @@ def main():
             return block("map", "Before finishing: add these new top-level paths to the "
                          "'## Project map' section of CLAUDE.md, one short line each: "
                          + ", ".join(missing))
+
+    if not flags.get("skillsize"):
+        big = long_skills()
+        if big:
+            return block("skillsize", f"Skill file(s) over {SKILL_MAX_LINES} lines: {', '.join(big)}. Before "
+                         "finishing, keep only the steps in SKILL.md and move long reference material into "
+                         "separate files in the skill folder that SKILL.md points to (loaded only when needed).")
 
     task_log = f'{PY} "{os.path.join(HOOKS, "task_log.py")}"'
     label = load(session_path(sid, "label.json"), {}).get("label")
