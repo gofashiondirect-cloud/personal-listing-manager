@@ -145,3 +145,30 @@ def sync_claude_md(root):
         with open(path, "w", encoding="utf-8") as f:
             f.write(new)
     return block
+
+
+SRC_EXT = (".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go")
+SKIP_WALK = {"node_modules", ".venv", "venv", "dist", "build", ".git", "coverage", "__pycache__"}
+
+
+def is_test_file(rel):
+    b = os.path.basename(rel)
+    return (b.startswith("test_") or b.endswith(("_test.py", "_test.go"))
+            or re.search(r"\.(test|spec)\.[jt]sx?$", b) is not None
+            or "/__tests__/" in "/" + rel.replace(os.sep, "/"))
+
+
+def tests_for(root, rel):
+    """Test files that look like they cover source file `rel` (by name convention)."""
+    stem = os.path.splitext(os.path.basename(rel))[0]
+    ext = os.path.splitext(rel)[1]
+    if ext == ".go":
+        d = os.path.join(root, os.path.dirname(rel))
+        return [os.path.join(os.path.dirname(rel), f) for f in os.listdir(d) if f.endswith("_test.go")] if os.path.isdir(d) else []
+    names = ({f"test_{stem}.py", f"{stem}_test.py"} if ext == ".py" else
+             {f"{stem}.{k}.{e}" for k in ("test", "spec") for e in ("js", "jsx", "ts", "tsx", "mjs", "cjs")})
+    found = []
+    for dp, dirs, fs in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in SKIP_WALK and not d.startswith(".")]
+        found += [os.path.relpath(os.path.join(dp, f), root) for f in fs if f in names]
+    return found

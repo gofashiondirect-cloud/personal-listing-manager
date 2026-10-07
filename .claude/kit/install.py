@@ -118,6 +118,16 @@ def main():
         if os.path.abspath(kit_dst) != KIT:
             shutil.copytree(KIT, kit_dst, dirs_exist_ok=True)
 
+    if not a.glob:
+        sys.path.insert(0, hooks_dir)
+        try:
+            from ci import write as write_ci
+            wf = write_ci(os.path.dirname(dest_claude))
+            if wf:
+                print(f"CI workflow added: {wf}")
+        except Exception as e:
+            print(f"(CI workflow skipped: {e})")
+
     print(f"claude-kit installed -> {dest_claude} (rules in {rules_path})")
 
 

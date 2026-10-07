@@ -5,7 +5,7 @@ First runs the project's own formatter (auto-detected; only if the project has o
 Per-project overrides in .claude/checks.json, e.g. {".ts": "npx --no-install tsc --noEmit",
 ".py": "ruff check {file}", "format": {".py": "black -q {file}"}}. An empty string disables one.
 """
-import os, shutil, subprocess
+import os, re, shutil, subprocess
 from _kit import setting, safe_run, log_event, ROOT, PY, read_input, load, save, session_path, emit
 
 TIMEOUT = setting("CLAUDE_CHECK_TIMEOUT", 60)
@@ -75,6 +75,41 @@ def auto_format(path, ext, custom):
     return None
 
 
+SIG = [re.compile(p, re.M) for p in (
+    r"^\s*(?:async\s+)?def\s+(\w+)\s*\(([^)]*)\)",                     # python
+    r"(?:^|\s)(?:export\s+)?(?:async\s+)?function\s*\*?\s*(\w+)\s*\(([^)]*)\)",  # js function
+    r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(([^)]*)\)\s*=>",       # js arrow
+    r"^\s*func\s+(?:\([^)]*\)\s*)?(\w+)\s*\(([^)]*)\)",                    # go
+)]
+
+
+def signatures(code):
+    return {m.group(1): re.sub(r"\s+", " ", m.group(2)).strip() for rx in SIG for m in rx.finditer(code or "")}
+
+
+def caller_note(data, path):
+    """If an edit renamed a function or changed its parameters, list the places that call it."""
+    inp = data.get("tool_input") or {}
+    pairs = [(e.get("old_string"), e.get("new_string")) for e in inp.get("edits", [])] or \
+            [(inp.get("old_string"), inp.get("new_string"))]
+    changed = []
+    for old, new in pairs:
+        before, after = signatures(old), signatures(new)
+        changed += [n for n, params in before.items() if after.get(n) != params]
+    notes = []
+    for name in sorted(set(changed))[:5]:
+        try:
+            out = subprocess.run(["git", "grep", "-n", "-w", name, "--", ".", ":!*.md"], cwd=ROOT,
+                                 capture_output=True, text=True, timeout=10).stdout.splitlines()
+        except Exception:
+            continue
+        rel = os.path.relpath(path, ROOT)
+        uses = [l[:160] for l in out if not l.startswith(rel + ":")][:15]
+        if uses:
+            notes.append(f"`{name}` changed signature/name; update these callers:\n" + "\n".join(uses))
+    return "\n".join(notes) or None
+
+
 def main():
     data = read_input()
     path = (data.get("tool_input") or {}).get("file_path")
@@ -83,7 +118,7 @@ def main():
     ext = os.path.splitext(path)[1].lower()
     custom = load(os.path.join(ROOT, ".claude", "checks.json"), {})
     formatted = auto_format(path, ext, custom)
-    warning = "\n".join(x for x in (formatted, size_warning(data, path, ext)) if x) or None
+    warning = "\n".join(x for x in (formatted, size_warning(data, path, ext), caller_note(data, path)) if x) or None
     cmd = custom[ext] if ext in custom else default_cmd(ext)
     if not cmd:
         return warn(warning)

@@ -164,6 +164,50 @@ def related_tests(flags):
     return f"Tests related to your changes fail (`{cmd}`). Fix them before finishing:\n{tail}"
 
 
+def changed_files(exts):
+    try:
+        out = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=ROOT,
+                             capture_output=True, text=True, timeout=5).stdout
+    except Exception:
+        return []
+    return [l[3:].strip().strip('"') for l in out.splitlines() if l[3:].strip().strip('"').endswith(exts)]
+
+
+def broken_links(flags):
+    """After HTML changes, check internal links, anchors and redirect loops."""
+    html = changed_files((".html", ".htm"))
+    stamp = str(sorted(html))
+    if not html or flags.get("links") == stamp:
+        return None
+    from linkcheck import check
+    problems = check(ROOT)
+    if not problems:
+        flags["links"] = stamp
+        return None
+    return "Broken links or redirect loops after your changes. Fix them before finishing:\n" + "\n".join(problems[:30])
+
+
+def boot_check(flags):
+    """After code changes, start the app briefly and make sure it still boots."""
+    if not setting("CLAUDE_SMOKE_TEST", 1):
+        return None
+    files = changed_code_files()
+    stamp = str([(f, os.path.getmtime(os.path.join(ROOT, f))) for f in files])
+    if not files or flags.get("booted") == stamp:
+        return None
+    from stack import detect
+    cmd = detect(ROOT)[1].get("dev")
+    if not cmd or cmd.startswith("open "):
+        return None
+    from smoke import smoke
+    ok, tail = smoke(cmd, setting("CLAUDE_SMOKE_SECONDS", 25))
+    log_event("smoke", "pass" if ok else "fail")
+    if ok:
+        flags["booted"] = stamp
+        return None
+    return f"The app no longer starts (`{cmd}`). Fix it before finishing:\n{tail}"
+
+
 def main():
     data = read_input()
     sid = data.get("session_id") or "unknown"
@@ -189,7 +233,7 @@ def main():
         save(flags_file, flags)
         emit({"decision": "block", "reason": reason})
 
-    failing = related_tests(flags)
+    failing = related_tests(flags) or broken_links(flags) or boot_check(flags)
     save(flags_file, flags)
     if failing:
         return block("tests", failing)

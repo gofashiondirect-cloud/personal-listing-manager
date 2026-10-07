@@ -24,6 +24,13 @@
 - Record each finished feature as one user-facing line at the top of `CHANGELOG.md`.
 - Repeated kinds of feature (new page, endpoint, component) become scaffold skills via the skill rule below.
 
+## Not breaking what works (hooks enforce these)
+- Before changing existing code that has no test, write a small lock-in test of its current behaviour, then change it.
+- When you rename a function or change its parameters, update every caller the hook lists.
+- `git commit` runs the full test suite (and link check); a failing commit means something else depends on your change.
+- After code changes the app is started briefly; after HTML changes, links, anchors and redirects are checked.
+- CI (`.github/workflows/`) runs the same checks on every push; keep it green.
+
 ## Self-improvement (hooks enforce the first three)
 - Keep the `## Project map` in CLAUDE.md current when adding top-level files or folders.
 - When asked by the Stop hook, record a task label; reuse an existing label for the same kind of task.
