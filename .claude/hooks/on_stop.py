@@ -282,6 +282,18 @@ def main():
     if failing:
         return block("tests", failing)
 
+    from plan_check import open_plan, unproven
+    plan = open_plan(ROOT)
+    if plan and flags.get("plan_blocks", 0) < 4:
+        missing = unproven(plan)
+        if missing:
+            flags["plan_blocks"] = flags.get("plan_blocks", 0) + 1
+            save(flags_file, flags)
+            return emit({"decision": "block", "reason": (
+                "The plan in .claude/plans/current.md isn't finished. Complete each item and add its proof "
+                "(`- proof: ...`), or mark it `- dropped: <reason>`; if the user should decide, ask them:\n"
+                + "\n".join(missing[:15]))})
+
     if not flags.get("map"):
         missing = unmapped_paths()
         if missing:

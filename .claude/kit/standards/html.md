@@ -1,0 +1,11 @@
+# HTML standard (sources: WHATWG HTML, MDN, WCAG 2.2 AA, Core Web Vitals)
+- `<!doctype html>`, `<html lang="..">`, `<meta charset="utf-8">`, `<meta name="viewport" content="width=device-width, initial-scale=1">`.
+- Unique `<title>` and `<meta name="description">`; public pages also get Open Graph tags and a canonical link.
+- Semantic layout: `header`, `nav`, `main` (exactly one), `footer`, `section`/`article`; exactly one `<h1>`, headings never skip levels.
+- Every `<img>` has `alt` (empty `alt=""` only if decorative), `width` and `height`; below-the-fold images `loading="lazy"`.
+- Every form control has a `<label>` (or `aria-label`); use `<button>` for actions and `<a href>` for navigation, never clickable `<div>`s.
+- No inline `style=""` or inline event handlers; CSS in stylesheets, scripts with `defer` (or `type="module"`).
+- Links: relative paths for internal pages; external `target="_blank"` links get `rel="noopener noreferrer"`.
+- Unique `id`s; valid nesting (no block elements inside `<p>` or `<a>` inside `<a>`).
+- Accessibility: text contrast at least 4.5:1, visible focus styles, works with keyboard only, meaningful link text (not "click here").
+- Performance: no render-blocking scripts in `<head>`, compressed/modern images (webp/avif/svg), largest image preloaded if above the fold.

@@ -38,6 +38,8 @@ def default_cmd(ext):
         return f'"{eslint}" {{file}}'
     if ext == ".py":
         return "ruff check {file}" if shutil.which("ruff") else PY + " -m py_compile {file}"
+    if ext in (".html", ".htm"):
+        return PY + f' "{os.path.join(os.path.dirname(os.path.abspath(__file__)), "htmlcheck.py")}" {{file}}'
     if ext == ".json":
         return PY + ' -c "import json,sys; json.load(open(sys.argv[1], encoding=\'utf-8\'))" {file}'
     if ext in (".js", ".mjs", ".cjs") and shutil.which("node"):

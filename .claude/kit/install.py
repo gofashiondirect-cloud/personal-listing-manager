@@ -95,6 +95,15 @@ def main():
         json.dump(merged, f, indent=2)
         f.write("\n")
 
+    for sub in ("standards", "templates"):  # checklists and plan template
+        src_dir = os.path.join(KIT, sub)
+        if os.path.isdir(src_dir):
+            dst_dir = os.path.join(dest_claude, sub)
+            os.makedirs(dst_dir, exist_ok=True)
+            for f in os.listdir(src_dir):  # never overwrite a project's *.local.md overrides
+                if not f.endswith(".local.md"):
+                    shutil.copy2(os.path.join(src_dir, f), dst_dir)
+
     skills_src = os.path.join(KIT, "skills")
     if os.path.isdir(skills_src):
         shutil.copytree(skills_src, os.path.join(dest_claude, "skills"), dirs_exist_ok=True)

@@ -75,6 +75,11 @@ def main():
         notes.append("Fast mode ON: tests, startup, link and visual checks now run only at `git commit`; "
                      "per-edit checks still run. Say 'fast mode off' to restore." if on else
                      "Fast mode OFF: all checks run at the end of each turn again.")
+    if re.search(r"(^|[.!]\s+)(no[,.!]|wrong|that's not|not like that)|\b(don'?t|do not|never|always|stop (doing|using)|"
+                 r"i (prefer|want you to|like it when)|instead of|from now on|next time)\b", prompt[:600], re.I):
+        notes.append("If this message corrects you or states a lasting preference, add it as one short line under "
+                     "`## Preferences` in CLAUDE.md (create the section if missing), so future sessions follow it. "
+                     "Skip this for one-off instructions.")
     hints = file_hints(prompt)
     if hints:
         notes.append("Likely relevant files (from names; verify before relying on them): " + ", ".join(hints))
