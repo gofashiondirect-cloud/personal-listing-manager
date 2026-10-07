@@ -1,0 +1,13 @@
+# Performance criteria (sources: Core Web Vitals, web.dev, performance budgets)
+- PERF-01 LCP: largest content appears within 2.5s on a mid-range phone.
+- PERF-02 INP: interactions respond within 200ms.
+- PERF-03 CLS: layout shift under 0.1 (images and embeds have reserved size).
+- PERF-04 Images: modern formats (webp/avif/svg), sized to display size, lazy-loaded below the fold.
+- PERF-05 JavaScript: no unused or render-blocking scripts; code split per route; bundle within budget.
+- PERF-06 CSS: critical CSS small; no unused large frameworks.
+- PERF-07 Fonts: few weights, `font-display: swap`, preloaded if above the fold.
+- PERF-08 Caching: static assets cached with long expiry and hashed names.
+- PERF-09 Network: compressed responses (gzip/brotli); minimal requests on first load.
+- PERF-10 Data: queries indexed; no N+1 queries; paginate large lists.
+- PERF-11 Server: response time under ~200ms for common requests; slow work moved to background jobs.
+- PERF-12 Budget: page weight and bundle size budgets set and checked.

@@ -1,12 +1,12 @@
 # DevOps / SRE standard (sources: Twelve-Factor App, Google SRE, DORA)
-- Every push runs CI (lint, typecheck, tests, build); main stays deployable.
-- Deploys are automated, repeatable and reversible: one command or merge to deploy, one to roll back.
-- Same build artefact for staging and production; config differs only by environment variables.
-- Secrets live in the host's secret store or CI secrets, never in the repo or images.
-- Database migrations run as a deploy step, backwards-compatible with the running version.
-- Health check endpoint; uptime monitoring with alerts to a channel someone reads.
-- Errors reported to an error tracker (e.g. Sentry) with release version; structured logs with request ids.
-- Automated daily backups of databases and uploads; restore tested at least once.
-- Pin runtime and dependency versions; update them regularly (Dependabot/Renovate).
-- Dockerfiles: small base image, non-root user, multi-stage build, no secrets in layers.
-- Write down how to deploy, roll back and restore in the README.
+- OPS-01 Every push runs CI (lint, typecheck, tests, build); main stays deployable.
+- OPS-02 Deploys are automated, repeatable and reversible: one command or merge to deploy, one to roll back.
+- OPS-03 Same build artefact for staging and production; config differs only by environment variables.
+- OPS-04 Secrets live in the host's secret store or CI secrets, never in the repo or images.
+- OPS-05 Database migrations run as a deploy step, backwards-compatible with the running version.
+- OPS-06 Health check endpoint; uptime monitoring with alerts to a channel someone reads.
+- OPS-07 Errors reported to an error tracker (e.g. Sentry) with release version; structured logs with request ids.
+- OPS-08 Automated daily backups of databases and uploads; restore tested at least once.
+- OPS-09 Pin runtime and dependency versions; update them regularly (Dependabot/Renovate).
+- OPS-10 Dockerfiles: small base image, non-root user, multi-stage build, no secrets in layers.
+- OPS-11 Write down how to deploy, roll back and restore in the README.

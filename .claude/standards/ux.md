@@ -1,14 +1,18 @@
-# UX principles (sources: Nielsen's 10 usability heuristics, WCAG 2.2, Material/Apple HIG)
-- Visibility of system status: every action gives feedback (loading spinner, success message, disabled button while saving).
-- Speak the user's language: plain words, no internal jargon or raw error codes.
-- User control: easy undo/cancel/back; confirm only destructive actions.
-- Consistency: same words, colours, button styles and positions for the same things across the app.
-- Prevent errors: sensible defaults, input constraints, inline validation before submit.
-- Recognition over recall: show options and recent items; keep labels visible (not only placeholders).
-- Efficiency: shortcuts for frequent tasks, minimal steps, remember the user's choices.
-- Minimalist design: one primary action per screen, clear visual hierarchy, generous spacing; remove what isn't needed.
-- Help users recover: error messages say what went wrong and how to fix it, next to the field.
-- Empty states explain what goes here and offer the first action.
-- Mobile first: tap targets at least 44x44px, readable without zoom, works one-handed.
-- Accessible to everyone: keyboard, screen reader, contrast, reduced motion (see html/css standards).
-- Fast feel: show content quickly (skeletons, optimistic updates), never block the whole screen for one item.
+# UX criteria (sources: Nielsen's 10 usability heuristics, ISO 9241-11, usability attributes)
+- UX-01 Status visibility: every action shows feedback (loading, saved, sent, failed) within ~1s.
+- UX-02 Real-world language: plain words the user uses; no jargon, codes or internal names.
+- UX-03 User control: undo, cancel, back and close are available; confirm only destructive actions.
+- UX-04 Consistency: same words, icons, colours and positions for the same things everywhere.
+- UX-05 Error prevention: sensible defaults, constraints and inline validation before submit.
+- UX-06 Recognition over recall: options and context are visible; labels stay visible (not placeholder-only).
+- UX-07 Efficiency: frequent tasks take few steps; shortcuts and remembered choices for repeat users.
+- UX-08 Minimalism: one primary action per screen; nothing on screen that doesn't help the task.
+- UX-09 Error recovery: messages say what went wrong and how to fix it, next to the problem.
+- UX-10 Help: help or hints are available where users get stuck, without leaving the task.
+- UX-11 Empty states: explain what goes here and offer the first action.
+- UX-12 Onboarding: a first-time user can complete the main task without instructions.
+- UX-13 Navigation: users always know where they are and how to get back.
+- UX-14 Forms: only necessary fields, logical order, correct input types, clear required markers.
+- UX-15 Mobile: tap targets at least 44x44px, thumb-reachable actions, no horizontal scroll.
+- UX-16 Perceived speed: skeletons/optimistic updates; never block the whole screen for one item.
+- UX-17 Trust: clear pricing, privacy and contact information where decisions are made.

@@ -33,6 +33,7 @@
 ## Plan, research, prove
 - Anything bigger than a one-line fix starts with the `plan` skill: plan in `.claude/plans/current.md`, researched against (in order) the request, this project and `## Preferences`, saved notes in `.claude/research/`, official docs for the installed versions, then the standards in `.claude/standards/`.
 - Every plan item gets ticked only with proof (`- proof: test name / file:line / check result`); the Stop hook blocks finishing until it is.
+- Criteria are numbered per discipline (e.g. UX-03, A11Y-05, SEC-01) in `.claude/standards/`: Product, UX, UI design, Accessibility, Architecture, Engineering (per language), API, Database, Security, Privacy, Performance, QA, DevOps, Documentation. The plan's `Size:` (small/normal/big) scales how many disciplines apply.
 - Each plan has a dated discipline record (`.claude/records/<date>-<slug>.md`, made by `records.py new`): every checklist item of every discipline the change touches, ticked with a note or n/a. Disciplines are decided when the plan is saved (from its files and topic), extended when the real changes touch more, and finishing is blocked until the record is complete.
 - Before committing: re-check the request and Done-when, run the `code-review` skill on the diff, tick Review.
 - Save reusable research to `.claude/research/<topic>.md` (date + versions); reuse notes under ~90 days old instead of searching again.

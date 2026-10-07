@@ -1,0 +1,13 @@
+# UI design criteria (sources: design-system practice, Material Design, Apple HIG, Gestalt principles)
+- UI-01 Visual hierarchy: the most important element is the most prominent; one clear focal point.
+- UI-02 Typography: max 2 font families; a consistent type scale; body text 16px+, line height ~1.5.
+- UI-03 Colour: a defined palette (primary, secondary, neutrals, success/warning/error) used consistently.
+- UI-04 Spacing: a consistent spacing scale (e.g. 4/8px steps); related items grouped, unrelated separated.
+- UI-05 Alignment: elements align to a grid; consistent margins and edges.
+- UI-06 Components: buttons, inputs, cards and links reuse the same styles (design tokens/variables).
+- UI-07 States: every interactive element has hover, focus, active, disabled and loading states.
+- UI-08 Icons and images: consistent style and size; meaningful, not decorative noise.
+- UI-09 Responsive: layouts adapt at small, medium and large widths without breaking.
+- UI-10 Density: enough whitespace to scan; line length 45-90 characters.
+- UI-11 Branding: logo, colours and tone match the brand across pages.
+- UI-12 Dark mode/theming: if supported, every colour comes from theme variables.

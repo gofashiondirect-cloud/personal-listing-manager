@@ -10,16 +10,22 @@ import os, re
 from _kit import safe_run, ROOT, read_input, emit
 
 TOPICS = {
+    "product": r"new app|\bmvp\b|product requirement|\bprd\b|user stor",
     "privacy": r"login|sign[ -]?up|register|password|account|profile|personal data|payment|checkout|billing|"
                r"cookie|analytics|tracking|newsletter|contact form|email list|gdpr|consent",
+    "security": r"login|auth|password|permission|role|upload|payment|token|session|api key|webhook|admin",
     "devops": r"deploy|docker|ci/cd|pipeline|hosting|server config|environment variable|backup|monitoring",
     "sql": r"\bdatabase|\bschema\b|\bmigrations?\b|\b(db|database) (table|index)|\bcolumns?\b|\bsql\b",
-    "api": r"\bapi\b|endpoint|route|webhook|rest",
-    "ux": r"\bpage|screen|form|button|modal|layout|design|navigation|\bui\b|mobile",
-    "architecture": r"new (module|file|page|component|service|feature)|refactor|restructure|folder",
+    "api": r"\bapi\b|endpoint|webhook|\brest\b",
+    "ux": r"\bpage|screen|form|button|modal|navigation|\bflow\b|onboarding|mobile",
+    "ui": r"design|style|colou?r|theme|layout|font|spacing|branding|look",
+    "accessibility": r"accessib|screen reader|keyboard|contrast|\bwcag\b|\ba11y\b",
+    "performance": r"speed|slow|performance|load time|faster|optimi[sz]e|lighthouse|core web vitals",
+    "architecture": r"new (module|file|page|component|service|feature|app)|refactor|restructure|folder",
+    "docs": r"readme|documentation|\bdocs?\b|changelog|help page",
     "tests": r"\btest",
 }
-PATH = re.compile(r"`?([\w./-]+\.(?:html?|css|scss|js|jsx|ts|tsx|vue|svelte|py|sql|prisma|ya?ml|toml|json)|Dockerfile)`?")
+PATH = re.compile(r"([\w./-]+\.(?:html?|scss|css|jsx|js|tsx|ts|vue|svelte|py|sql|prisma|ya?ml|toml|json)\b|Dockerfile)")
 
 
 def specific_text(plan):
@@ -44,7 +50,27 @@ def planned_keys(plan):
             keys.add(key)
     if keys & {"html", "css", "javascript", "react", "python", "sql", "api"}:
         keys.add("tests")
-    return keys
+    return scale(keys, plan, text)
+
+
+FILE_KEYS = {"html", "css", "javascript", "react", "python", "sql", "api", "devops", "docs", "tests"}
+
+
+def scale(keys, plan, text=None):
+    """Apply the plan's Size: small keeps the files' own criteria (+ privacy/security if the topic needs it);
+    big adds architecture, security and documentation."""
+    size = re.search(r"^Size:\s*(small|normal|big)", plan, re.I | re.M)
+    size = size.group(1).lower() if size else "normal"
+    if size == "small":
+        topics = topic_keys(text if text is not None else specific_text(plan))
+        return {k for k in keys if k in FILE_KEYS or (k in ("privacy", "security") and k in topics)}
+    if size == "big":
+        return set(keys) | {"architecture", "docs", "security"}
+    return set(keys)
+
+
+def topic_keys(text):
+    return {key for key, rx in TOPICS.items() if re.search(rx, text, re.I)}
 
 
 def main():

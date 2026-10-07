@@ -1,12 +1,12 @@
 # Privacy and compliance standard (sources: GDPR / UK GDPR, ePrivacy, PCI DSS, OWASP) - not legal advice
-- Collect only the personal data you need (data minimisation); know why you keep each field and for how long.
-- A privacy policy that matches what the app really collects, shares and stores; link it wherever data is collected.
-- Non-essential cookies, analytics and tracking only after the user opts in; essential cookies need no consent.
-- Consent is explicit, recorded and as easy to withdraw as to give; no pre-ticked boxes.
-- Users can see, export and delete their data (account deletion that really deletes or anonymises).
-- Passwords hashed with bcrypt/argon2; personal data encrypted in transit (HTTPS) and sensitive fields at rest.
-- Never log passwords, tokens, card numbers or full personal data.
-- Payments through a provider's hosted fields/checkout (Stripe, PayPal) so card data never touches your servers (PCI DSS scope).
-- Third-party services that receive personal data are listed in the privacy policy (processors).
-- Emails: marketing only with consent and an unsubscribe link; transactional emails are fine.
-- App stores: follow their privacy labels and review guidelines; children's data needs extra care (COPPA/age rules).
+- PRIV-01 Collect only the personal data you need (data minimisation); know why you keep each field and for how long.
+- PRIV-02 A privacy policy that matches what the app really collects, shares and stores; link it wherever data is collected.
+- PRIV-03 Non-essential cookies, analytics and tracking only after the user opts in; essential cookies need no consent.
+- PRIV-04 Consent is explicit, recorded and as easy to withdraw as to give; no pre-ticked boxes.
+- PRIV-05 Users can see, export and delete their data (account deletion that really deletes or anonymises).
+- PRIV-06 Passwords hashed with bcrypt/argon2; personal data encrypted in transit (HTTPS) and sensitive fields at rest.
+- PRIV-07 Never log passwords, tokens, card numbers or full personal data.
+- PRIV-08 Payments through a provider's hosted fields/checkout (Stripe, PayPal) so card data never touches your servers (PCI DSS scope).
+- PRIV-09 Third-party services that receive personal data are listed in the privacy policy (processors).
+- PRIV-10 Emails: marketing only with consent and an unsubscribe link; transactional emails are fine.
+- PRIV-11 App stores: follow their privacy labels and review guidelines; children's data needs extra care (COPPA/age rules).

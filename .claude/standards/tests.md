@@ -1,7 +1,11 @@
 # Test standard
-- Test behaviour, not implementation: inputs and visible outputs.
-- One clear reason to fail per test; descriptive names (`test_total_ignores_cancelled_orders`).
-- Cover the normal case, edge cases (empty, zero, large, invalid) and the error path.
-- No real network, time or randomness: fake or freeze them.
-- Tests are fast and independent; they can run in any order.
-- A bug fix comes with a test that fails before the fix.
+- QA-01 Test behaviour, not implementation: inputs and visible outputs.
+- QA-02 One clear reason to fail per test; descriptive names (`test_total_ignores_cancelled_orders`).
+- QA-03 Cover the normal case, edge cases (empty, zero, large, invalid) and the error path.
+- QA-04 No real network, time or randomness: fake or freeze them.
+- QA-05 Tests are fast and independent; they can run in any order.
+- QA-06 A bug fix comes with a test that fails before the fix.
+- QA-07 Every acceptance criterion in the plan/PRD has a test or a recorded manual check.
+- QA-08 Regression: the full suite passes before commit; CI is green on the pushed branch.
+- QA-09 Test data: tests create their own data and clean up; no dependence on production data.
+- QA-10 Manual check: user-visible changes were viewed in the running app (desktop and mobile width).

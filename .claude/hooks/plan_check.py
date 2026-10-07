@@ -40,11 +40,12 @@ def review_done(text):
     return any(m and m.group(1).lower() == "x" for m in items)
 
 
-DISCIPLINE = {  # standard -> sign-off name shown in the plan
-    "html": "Engineering (HTML)", "css": "Engineering (CSS)", "javascript": "Engineering (JS/TS)",
-    "react": "Engineering (React)", "python": "Engineering (Python)", "architecture": "Architecture",
-    "ux": "UX/UI", "tests": "QA", "sql": "Database", "api": "API", "privacy": "Privacy & security",
-    "devops": "DevOps",
+DISCIPLINE = {  # standard file -> discipline name shown in records
+    "product": "Product", "ux": "UX", "ui": "UI design", "accessibility": "Accessibility",
+    "architecture": "Architecture", "html": "Engineering (HTML)", "css": "Engineering (CSS)",
+    "javascript": "Engineering (JS/TS)", "react": "Engineering (React)", "python": "Engineering (Python)",
+    "api": "API", "sql": "Database", "security": "Security", "privacy": "Privacy",
+    "performance": "Performance", "tests": "QA", "devops": "DevOps", "docs": "Documentation",
 }
 
 

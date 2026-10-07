@@ -12,6 +12,8 @@ description: Plan a change before building it, research the plan against the rig
 - **New app or major product feature**: first write a product requirements doc from `templates/PRD.md` to `.claude/plans/prd-<slug>.md` (problem, users, goals, MVP user stories with acceptance criteria, out of scope, UX, data/privacy, release slices). Agree it with the user, then plan each release slice.
 
 ## 2. Write the plan
+Set the `Size:` line: `small` gets only the criteria of the file types touched (plus QA, and privacy/security if the topic needs it); `normal` adds UX, UI, accessibility and performance for user-facing work and other disciplines the topic implies; `big` adds architecture, security and documentation too.
+
 Copy `.claude/kit/templates/PLAN.md` (or `~/.claude/templates/PLAN.md`) to `.claude/plans/current.md` and fill it in. Every item is a checkbox; leave out sections that don't apply instead of writing "N/A".
 
 ## 3. Research the plan, in this order (stop as soon as a source answers it)

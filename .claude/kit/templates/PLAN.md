@@ -1,5 +1,6 @@
 # Plan: <short title>
 Status: in progress
+Size: normal   (small = a few lines in known files; normal = a feature; big = many files, new data, auth/payments)
 Record: none yet (run records.py new <slug>)
 Request: <the user's words, short>
 Done when: <what the user sees or can do, and the check that proves it>

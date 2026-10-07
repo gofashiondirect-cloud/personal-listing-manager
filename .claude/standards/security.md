@@ -1,0 +1,17 @@
+# Security criteria (sources: OWASP Top 10 2021, OWASP ASVS 4)
+- SEC-01 Access control (A01): every request checks the user may access this specific object/action.
+- SEC-02 Cryptography (A02): HTTPS everywhere; passwords hashed with argon2/bcrypt; sensitive data encrypted at rest.
+- SEC-03 Injection (A03): parameterised queries; no user input in shell commands or eval.
+- SEC-04 XSS (A03): user content escaped or sanitised; no unsafe innerHTML; Content Security Policy set.
+- SEC-05 Secure design (A04): threats considered for new features (abuse, fraud, data leaks).
+- SEC-06 Configuration (A05): secure headers, no debug mode or default credentials in production.
+- SEC-07 Dependencies (A06): dependencies up to date; known-vulnerable packages fixed.
+- SEC-08 Authentication (A07): strong passwords or passkeys, rate-limited login, secure session cookies (HttpOnly, Secure, SameSite).
+- SEC-09 Integrity (A08): no untrusted code or data deserialised; lockfiles committed; CI from trusted sources.
+- SEC-10 Logging (A09): security events logged without secrets; alerts on suspicious activity.
+- SEC-11 SSRF (A10): server-side requests to user-supplied URLs are validated against an allow-list.
+- SEC-12 Secrets: no secrets in code, logs, URLs or client bundles; rotated if leaked.
+- SEC-13 Input validation: all external input validated by type, length and format on the server.
+- SEC-14 CSRF: state-changing requests protected (SameSite cookies or tokens).
+- SEC-15 Uploads: file type and size checked; stored outside the web root; never executed.
+- SEC-16 Rate limiting: public endpoints and forms limited against abuse and spam.

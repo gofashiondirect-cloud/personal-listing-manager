@@ -1,0 +1,18 @@
+# Accessibility criteria (source: WCAG 2.2 level AA success criteria)
+- A11Y-01 Text alternatives (1.1.1): every meaningful image has alt text; decorative images have alt="".
+- A11Y-02 Structure (1.3.1): headings, lists, landmarks and tables use the right elements.
+- A11Y-03 Meaningful order (1.3.2): reading and tab order follow the visual order.
+- A11Y-04 Not colour alone (1.4.1): information is never conveyed by colour only.
+- A11Y-05 Contrast (1.4.3/1.4.11): text 4.5:1 (large text 3:1); UI components and focus rings 3:1.
+- A11Y-06 Resize and reflow (1.4.4/1.4.10): usable at 200% zoom and 320px width without horizontal scroll.
+- A11Y-07 Keyboard (2.1.1): everything works with the keyboard alone; no keyboard traps (2.1.2).
+- A11Y-08 Focus visible (2.4.7/2.4.11): the focused element is always clearly visible and not hidden.
+- A11Y-09 Skip and titles (2.4.1/2.4.2): skip link to main content; each page has a unique title.
+- A11Y-10 Link purpose (2.4.4): link text makes sense on its own.
+- A11Y-11 Target size (2.5.8): pointer targets at least 24x24px.
+- A11Y-12 Language (3.1.1): page language set in `lang`.
+- A11Y-13 Predictable (3.2): no unexpected changes on focus or input.
+- A11Y-14 Labels and errors (3.3.1/3.3.2): inputs have labels; errors are identified in text.
+- A11Y-15 Name, role, value (4.1.2): custom controls expose the right ARIA name, role and state.
+- A11Y-16 Motion (2.3/2.2.2): no flashing; animations respect prefers-reduced-motion; moving content can be paused.
+- A11Y-17 Status messages (4.1.3): dynamic updates are announced (aria-live) without moving focus.

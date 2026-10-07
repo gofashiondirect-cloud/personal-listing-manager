@@ -1,12 +1,12 @@
 # Architecture principles (sources: SOLID, Clean Architecture, The Twelve-Factor App)
-- Separation of concerns: keep UI, business logic and data access in separate layers/modules; business rules never import UI code.
-- Single responsibility: each module, class or function has one reason to change.
-- Depend on interfaces at boundaries (database, payment, email, external APIs) so they can be swapped or faked in tests.
-- Organise by feature (`orders/`, `auth/`) rather than by type once the app has more than a few screens; follow the project's existing layout.
-- One source of truth per piece of data; derive the rest instead of copying it.
-- Keep it simple (KISS) and don't build for imagined futures (YAGNI); extract shared code on the third repetition (DRY), not the first.
-- Config and secrets from environment variables; same code runs in dev, test and production (Twelve-Factor).
-- Stateless request handling; state lives in the database, cache or client, not in server memory.
-- Fail fast at boundaries: validate input on entry, return clear errors, log with context.
-- Make it observable: structured logs, a health check endpoint for services, errors reported somewhere you will see them.
-- New dependency only when it saves real work, is maintained, and its licence fits; prefer the framework's built-in way.
+- ARCH-01 Separation of concerns: keep UI, business logic and data access in separate layers/modules; business rules never import UI code.
+- ARCH-02 Single responsibility: each module, class or function has one reason to change.
+- ARCH-03 Depend on interfaces at boundaries (database, payment, email, external APIs) so they can be swapped or faked in tests.
+- ARCH-04 Organise by feature (`orders/`, `auth/`) rather than by type once the app has more than a few screens; follow the project's existing layout.
+- ARCH-05 One source of truth per piece of data; derive the rest instead of copying it.
+- ARCH-06 Keep it simple (KISS) and don't build for imagined futures (YAGNI); extract shared code on the third repetition (DRY), not the first.
+- ARCH-07 Config and secrets from environment variables; same code runs in dev, test and production (Twelve-Factor).
+- ARCH-08 Stateless request handling; state lives in the database, cache or client, not in server memory.
+- ARCH-09 Fail fast at boundaries: validate input on entry, return clear errors, log with context.
+- ARCH-10 Make it observable: structured logs, a health check endpoint for services, errors reported somewhere you will see them.
+- ARCH-11 New dependency only when it saves real work, is maintained, and its licence fits; prefer the framework's built-in way.

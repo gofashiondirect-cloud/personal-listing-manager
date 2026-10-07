@@ -62,7 +62,12 @@ def sync(path, extra=()):
     """Append sections for disciplines touched (or newly planned) since the record was created."""
     text = open(path, encoding="utf-8").read()
     have = set(re.findall(r"^## .*\((\w+)\.md\)", text, re.M))
-    new = sorted(k for k in set(required_standards(ROOT)) | set(extra) if k not in have)
+    from plan_hook import scale
+    try:
+        plan = open(plan_path(ROOT), encoding="utf-8").read()
+    except OSError:
+        plan = ""
+    new = sorted(k for k in scale(set(required_standards(ROOT)), plan) | set(extra) if k not in have)
     if new:
         with open(path, "a", encoding="utf-8") as f:
             f.write("\n" + "\n".join(l for k in new for l in section(k)))

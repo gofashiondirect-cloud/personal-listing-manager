@@ -1,0 +1,14 @@
+# Product criteria (sources: PRD practice, Jobs-to-be-Done, INVEST user stories)
+- PRD-01 Problem: the user problem is stated in one or two sentences, with who has it.
+- PRD-02 Users: primary users and their main job-to-be-done are named.
+- PRD-03 Goal: each goal has a measurable success metric and target.
+- PRD-04 Scope: MVP user stories are listed, most important first.
+- PRD-05 Stories: each story follows "As a / I want / so that" and is small enough to build in a slice.
+- PRD-06 Acceptance: every story has testable acceptance criteria.
+- PRD-07 Out of scope: what is deliberately left out is written down.
+- PRD-08 Flows: key user flows and screens are described, including empty/error states.
+- PRD-09 Data: personal data collected and why is listed.
+- PRD-10 Dependencies: integrations (payments, email, auth) and constraints are noted.
+- PRD-11 Risks: open questions and risks are listed with an owner.
+- PRD-12 Slices: release plan in shippable slices, each usable on its own.
+- PRD-13 Agreement: the owner has agreed the PRD before building starts.

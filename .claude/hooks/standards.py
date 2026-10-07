@@ -7,20 +7,24 @@ Each checklist is shown once per session. Checklists live in .claude/standards/<
 import os, re
 from _kit import safe_run, ROOT, HOOKS, read_input, session_path, load, save, emit
 
+UI_SET = ["ux", "ui", "accessibility", "performance"]
 RULES = [
-    (r"\.(html?|njk|hbs|ejs)$", ["html", "ux"]),
-    (r"\.(css|scss|sass|less)$", ["css", "ux"]),
-    (r"\.(jsx|tsx|vue|svelte)$", ["react", "javascript", "ux"]),
-    (r"\.(js|mjs|cjs|ts)$", ["javascript"]),
-    (r"\.py$", ["python"]),
-    (r"(\.sql$|(^|/)migrations?/|(^|/)db/migrate/|schema\.prisma$)", ["sql"]),
-    (r"(^|/)(api|routes|controllers|endpoints)/|(^|/)(views|urls|routes|router)\.(py|js|ts)$|/route\.(js|ts)$", ["api"]),
+    (r"\.(html?|njk|hbs|ejs)$", ["html"] + UI_SET),
+    (r"\.(css|scss|sass|less)$", ["css"] + UI_SET),
+    (r"\.(jsx|tsx|vue|svelte)$", ["react", "javascript", "security"] + UI_SET),
+    (r"\.(js|mjs|cjs|ts)$", ["javascript", "security"]),
+    (r"\.py$", ["python", "security"]),
+    (r"(\.sql$|(^|/)migrations?/|(^|/)db/migrate/|schema\.prisma$)", ["sql", "security"]),
+    (r"(^|/)(api|routes|controllers|endpoints)/|(^|/)(views|urls|routes|router)\.(py|js|ts)$|/route\.(js|ts)$",
+     ["api", "security"]),
     (r"(^|/)(Dockerfile|docker-compose[^/]*\.ya?ml|Procfile|vercel\.json|netlify\.toml|fly\.toml|render\.ya?ml)$|"
-     r"(^|/)\.github/workflows/|(^|/)(infra|deploy|terraform|k8s|helm)/", ["devops"]),
+     r"(^|/)\.github/workflows/|(^|/)(infra|deploy|terraform|k8s|helm)/", ["devops", "security"]),
     (r"(auth|login|signup|register|account|profile|user|cookie|consent|analytics|tracking|privacy|payment|"
-     r"checkout|billing|newsletter|subscribe|contact)", ["privacy"]),
+     r"checkout|billing|newsletter|subscribe|contact|upload)", ["privacy", "security"]),
+    (r"(^|/)(README|CONTRIBUTING)[^/]*$|(^|/)docs/", ["docs"]),
     (r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+\.py$|_test\.(py|go)$|\.(test|spec)\.[jt]sx?$", ["tests"]),
 ]
+
 
 
 def standards_dirs():
