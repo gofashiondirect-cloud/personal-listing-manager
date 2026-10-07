@@ -6,6 +6,8 @@
 - Keep replies short: result first, details only when asked.
 - Prefer one clarifying question over exploring the whole repo on a guess.
 - Use an existing skill when one matches the task instead of working the steps out again.
+- Subagents: give them a narrow question and ask for a short answer (conclusion + file:line refs).
+- Trimmed results point to a full-output file: grep that file rather than re-running the command.
 
 ## Self-improvement (hooks enforce the first three)
 - Keep the `## Project map` in CLAUDE.md current when adding top-level files or folders.
@@ -14,6 +16,11 @@
 - If a read turned out to be useless bulk (generated, vendored, data, fixtures), add a `Read(...)` deny rule for it to `.claude/settings.json`.
 - When fixing a bug in a project that has tests, add a test that would have caught it.
 - If a hook's check fails after an edit, fix it before continuing.
+- Keep this file under ~150 lines. Rules that only matter inside one folder go in a `CLAUDE.md` in that folder (it loads only when working there).
+
+## When compacting
+Keep: the user's goal, decisions made, open tasks, files changed and key file:line references, and failing commands with their error lines.
+Drop: file contents, full logs, search results, and exploration that led nowhere.
 
 ## Building apps that call the Claude API
 - Put stable content (system prompt, tool definitions, reference docs) first and mark it for prompt caching.

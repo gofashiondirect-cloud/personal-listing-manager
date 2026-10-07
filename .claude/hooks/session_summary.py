@@ -67,5 +67,9 @@ if branch:
     status = git("status", "--short")
     lines.append("Uncommitted changes:\n" + status if status else "Working tree clean.")
 lines += [f"Files (depth {MAX_DEPTH}, max {MAX_ENTRIES}):", *tree()]
+if data.get("source") == "compact":
+    label = load(session_path(data.get("session_id"), "label.json"), {}).get("label")
+    lines.insert(1, "Context was just compacted. Continue from the summary; re-read only the files "
+                    "the next step needs, using grep or offset/limit." + (f" Task: {label}." if label else ""))
 lines += usage_summary()
 print("\n".join(lines))
