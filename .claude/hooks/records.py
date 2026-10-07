@@ -39,10 +39,10 @@ def current_record():
     return os.path.join(ROOT, found.group(0)) if found else None
 
 
-def create(slug):
+def create(slug, keys=None):
     os.makedirs(RECORDS, exist_ok=True)
     path = os.path.join(RECORDS, f"{time.strftime('%Y-%m-%d')}-{re.sub(r'[^a-z0-9]+', '-', slug.lower()).strip('-')}.md")
-    keys = required_standards(ROOT)
+    keys = sorted(set(keys or []) | set(required_standards(ROOT)))
     lines = [f"# Discipline record: {slug}", f"Date: {time.strftime('%Y-%m-%d %H:%M')}", "Plan: .claude/plans/current.md",
              "Fill every item: `- [x] ... - note: how/where (file:line, check, test)` or `- [x] ... - n/a: reason`.", ""]
     for k in keys:
@@ -58,11 +58,11 @@ def create(slug):
     return rel, keys
 
 
-def sync(path):
-    """Append sections for disciplines touched since the record was created."""
+def sync(path, extra=()):
+    """Append sections for disciplines touched (or newly planned) since the record was created."""
     text = open(path, encoding="utf-8").read()
     have = set(re.findall(r"^## .*\((\w+)\.md\)", text, re.M))
-    new = [k for k in required_standards(ROOT) if k not in have]
+    new = sorted(k for k in set(required_standards(ROOT)) | set(extra) if k not in have)
     if new:
         with open(path, "a", encoding="utf-8") as f:
             f.write("\n" + "\n".join(l for k in new for l in section(k)))
