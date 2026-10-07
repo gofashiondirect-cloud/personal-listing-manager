@@ -1,7 +1,8 @@
 {
-  "model": "sonnet",
+  "model": "opusplan",
   "env": {
-    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
   },
   "permissions": {
     "deny": [
@@ -58,6 +59,17 @@
           {
             "type": "command",
             "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/trim_output.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/long_session_nudge.py\"",
             "timeout": 10
           }
         ]

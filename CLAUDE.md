@@ -18,7 +18,8 @@ Preview by opening `index.html` in a browser. Keep this map updated when files a
 - Never read dependency, build or log folders (node_modules, dist, build, .venv, *.log).
 
 ## Cost
-- Default model is Sonnet (set in `.claude/settings.json`). Switch to Opus with `/model` only for hard design or debugging work.
+- Model is `opusplan` (set in `.claude/settings.json`): Opus while planning, Sonnet for the work. Override with `/model` only when needed.
+- Context auto-compacts at 60% full; a hook warns when a session gets long.
 - Subagents run on Haiku; give them narrow search tasks, not open-ended ones.
 - If a section here grows past a few lines (deploy steps, style guide), move it into a skill under `.claude/skills/` so it loads only when needed.
 
