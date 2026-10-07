@@ -33,6 +33,7 @@
 ## Plan, research, prove
 - Anything bigger than a one-line fix starts with the `plan` skill: plan in `.claude/plans/current.md`, researched against (in order) the request, this project and `## Preferences`, saved notes in `.claude/research/`, official docs for the installed versions, then the standards in `.claude/standards/`.
 - Every plan item gets ticked only with proof (`- proof: test name / file:line / check result`); the Stop hook blocks finishing until it is.
+- The plan's `## Sign-off` needs one proven line per discipline the change touches (Engineering, Architecture, UX/UI, QA, Database, API, Privacy & security, DevOps); the hook detects which from the changed files.
 - Before committing: re-check the request and Done-when, run the `code-review` skill on the diff, tick Review.
 - Save reusable research to `.claude/research/<topic>.md` (date + versions); reuse notes under ~90 days old instead of searching again.
 

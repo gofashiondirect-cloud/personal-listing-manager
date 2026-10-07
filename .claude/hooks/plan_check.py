@@ -38,3 +38,46 @@ def review_done(text):
     sect = text.split("## Review", 1)[1] if "## Review" in text else ""
     items = [ITEM.match(l) for l in sect.splitlines()]
     return any(m and m.group(1).lower() == "x" for m in items)
+
+
+DISCIPLINE = {  # standard -> sign-off name shown in the plan
+    "html": "Engineering (HTML)", "css": "Engineering (CSS)", "javascript": "Engineering (JS/TS)",
+    "react": "Engineering (React)", "python": "Engineering (Python)", "architecture": "Architecture",
+    "ux": "UX/UI", "tests": "QA", "sql": "Database", "api": "API", "privacy": "Privacy & security",
+    "devops": "DevOps",
+}
+
+
+def required_signoffs(root):
+    """Disciplines the current changes touch, from the changed and new files."""
+    import subprocess
+    from standards import RULES
+    out = subprocess.run(["git", "status", "--porcelain", "-uall"], cwd=root,
+                         capture_output=True, text=True, timeout=5).stdout
+    needed = set()
+    for line in out.splitlines():
+        rel = line[3:].strip().strip('"').split(" -> ")[-1]
+        if rel.startswith(".claude/") or rel in ("CHANGELOG.md", "CLAUDE.md"):
+            continue
+        if line[:2].strip() in ("??", "A"):
+            needed.add("architecture")
+        for rx, names in RULES:
+            if re.search(rx, rel, re.I):
+                needed.update(names)
+    if needed & {"html", "css", "javascript", "react", "python", "sql", "api"}:
+        needed.add("tests")
+    return sorted({DISCIPLINE[n] for n in needed if n in DISCIPLINE})
+
+
+def missing_signoffs(text, required):
+    """Required disciplines without a ticked, proven line in the plan's '## Sign-off' section."""
+    sect = text.split("## Sign-off", 1)[1].split("\n## ", 1)[0] if "## Sign-off" in text else ""
+    signed = []
+    for line in sect.splitlines():
+        m = ITEM.match(line)
+        if m and m.group(1).lower() == "x" and re.search(r"\b(proof|n/a)\s*:", m.group(2), re.I):
+            signed.append(m.group(2).lower())
+    def key(d):  # "Engineering (HTML)" -> "html"; "Privacy & security" -> "privacy"
+        m = re.search(r"\((.+)\)", d)
+        return (m.group(1) if m else d.split(" &")[0].split("/")[0]).lower()
+    return [d for d in required if not any(key(d) in s for s in signed)]

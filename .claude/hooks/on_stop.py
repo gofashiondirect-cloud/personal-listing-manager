@@ -278,7 +278,9 @@ def plan_gate(flags):
     plan = open_plan(ROOT)
     if not plan or flags.get("plan_blocks", 0) >= 4:
         return None
-    missing = unproven(plan)
+    from plan_check import required_signoffs, missing_signoffs
+    missing = unproven(plan) + [f"[Sign-off] add and prove: - [x] {d}: standard met - proof: ..."
+                                for d in missing_signoffs(plan, required_signoffs(ROOT))]
     if not missing:
         return None
     flags["plan_blocks"] = flags.get("plan_blocks", 0) + 1
