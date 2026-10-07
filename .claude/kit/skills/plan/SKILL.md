@@ -9,6 +9,7 @@ description: Plan a change before building it, research the plan against the rig
 - **Tiny** (typo, colour, one-line fix): no plan. Just do it.
 - **Normal** (one feature, a few files): short plan, only the sections that apply.
 - **Big** (many files, new data, auth/payments, unclear request): full plan; show it to the user and wait for OK.
+- **New app or major product feature**: first write a product requirements doc from `templates/PRD.md` to `.claude/plans/prd-<slug>.md` (problem, users, goals, MVP user stories with acceptance criteria, out of scope, UX, data/privacy, release slices). Agree it with the user, then plan each release slice.
 
 ## 2. Write the plan
 Copy `.claude/kit/templates/PLAN.md` (or `~/.claude/templates/PLAN.md`) to `.claude/plans/current.md` and fill it in. Every item is a checkbox; leave out sections that don't apply instead of writing "N/A".
@@ -18,7 +19,7 @@ Copy `.claude/kit/templates/PLAN.md` (or `~/.claude/templates/PLAN.md`) to `.cla
 2. **The project.** CLAUDE.md, `## Preferences`, the project map, the closest existing feature (follow its pattern), installed versions in package.json / requirements / lockfiles.
 3. **Saved research.** `.claude/research/*.md` notes newer than ~90 days: reuse them.
 4. **Official docs, live, for the installed versions** (react.dev, nextjs.org, docs.djangoproject.com, MDN, the library's changelog). Delegate to a subagent: "check X in the docs for version Y; reply in under 150 words with links".
-5. **Standards.** `.claude/standards/architecture.md` (where code goes, layers, boundaries), `ux.md` for anything users see, and the checklist for each file type, plus WCAG 2.2 AA (accessibility), OWASP Top 10 (security), Core Web Vitals (speed), the language style guide.
+5. **Standards.** `.claude/standards/architecture.md` (where code goes, layers, boundaries), `ux.md` for anything users see, `privacy.md` when personal data, cookies, analytics or payments are involved, `devops.md` for deploy/CI/hosting, and the checklist for each file type, plus WCAG 2.2 AA (accessibility), OWASP Top 10 (security), Core Web Vitals (speed), the language style guide.
 Fix the plan with what you learn. Save anything reusable to `.claude/research/<topic>.md` (date, versions, findings, links; under 30 lines).
 
 ## 4. Build against the plan

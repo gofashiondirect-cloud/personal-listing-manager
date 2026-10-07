@@ -15,6 +15,10 @@ RULES = [
     (r"\.py$", ["python"]),
     (r"(\.sql$|(^|/)migrations?/|(^|/)db/migrate/|schema\.prisma$)", ["sql"]),
     (r"(^|/)(api|routes|controllers|endpoints)/|(^|/)(views|urls|routes|router)\.(py|js|ts)$|/route\.(js|ts)$", ["api"]),
+    (r"(^|/)(Dockerfile|docker-compose[^/]*\.ya?ml|Procfile|vercel\.json|netlify\.toml|fly\.toml|render\.ya?ml)$|"
+     r"(^|/)\.github/workflows/|(^|/)(infra|deploy|terraform|k8s|helm)/", ["devops"]),
+    (r"(auth|login|signup|register|account|profile|user|cookie|consent|analytics|tracking|privacy|payment|"
+     r"checkout|billing|newsletter|subscribe|contact)", ["privacy"]),
     (r"(^|/)(tests?|__tests__)/|(^|/)test_[^/]+\.py$|_test\.(py|go)$|\.(test|spec)\.[jt]sx?$", ["tests"]),
 ]
 
@@ -41,7 +45,7 @@ def main():
     data = read_input()
     path = (data.get("tool_input") or {}).get("file_path") or ""
     rel = os.path.relpath(path, ROOT).replace(os.sep, "/") if path else ""
-    if not rel or rel.startswith((".claude/", "..")):
+    if not rel or rel.startswith((".claude/", "..")) or rel.startswith(".github/") and "workflows" not in rel:
         return
     wanted = ["architecture"] if data.get("tool_name") == "Write" and not os.path.exists(path) else []
     for rx, names in RULES:

@@ -24,6 +24,8 @@ Done when: <what the user sees or can do, and the check that proves it>
 - [ ] callers updated / nothing else breaks (full suite)
 - [ ] security: auth, input validation, secrets (if relevant)
 - [ ] database: migration created and tried on dev DB (if schema changes)
+- [ ] privacy: data minimised, consent, policy updated (if personal data/cookies/payments)
+- [ ] deploy: CI green, rollback path, env vars documented (if deploy/config changes)
 
 ## Quality
 - [ ] accessibility (labels, alt, keyboard, contrast)
